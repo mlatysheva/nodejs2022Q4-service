@@ -1,35 +1,35 @@
 # Home Library Service
 
-## Prerequisites
+This is a Nestjs RESTful music library application that can do the following:
+- create and update the user
+- create, update and delete a track, get a signle track by id and get all tracks
+- create, update and delete an artist, get a single artist by id and get all artists
+- create, update and delete an album, get a single album by id and get all albums
+- add, update and delete a track, artist or album to/from the user's favorites
 
-- Git - [Download & Install Git](https://git-scm.com/downloads).
-- Node.js - [Download & Install Node.js](https://nodejs.org/en/download/) and the npm package manager.
+## The stack used
+- Node.js
+- Nest.js
+- Typescript
+- Eslint/Prettier
+- Swagger
+## Downloading, Installing and Running the App
 
-## Downloading
+- Clone the repository by running `git clone https://github.com/mlatysheva/nodejs2022Q4-service.git`
+- On your local machine `cd` to the folder with the cloned repository
+- Install all NPM dependencies by running `npm i` from the command line
+- Rename the file `.env.example` into `.env`
+- The application has two modes of running: development and production
+- Run `npm run start` to run the application in the production mode
+- Run `npm run start:dev` to run the application in the development mode
+- Once the application is running, you can make CRUD requests to the relevant endpoints
+- The is a swagger file showing available endpoints and required request body and response body.
+After starting the app on port (4000 as default) you can open in your browser OpenAPI documentation by typing http://localhost:4000/doc/
 
-```
-git clone {repository URL}
-```
-
-## Installing NPM modules
-
-```
-npm install
-```
-
-## Running application
-
-```
-npm start
-```
-
-After starting the app on port (4000 as default) you can open
-in your browser OpenAPI documentation by typing http://localhost:4000/doc/.
-For more information about OpenAPI/Swagger please visit https://swagger.io/.
-
+[![Postman Requests](https://raw.githubusercontent.com/mlatysheva/nodejs2024Q2-service/develop/screenshot_postman.png)]
 ## Testing
 
-After application running open new terminal and enter:
+Once the application is running, open new terminal and enter:
 
 To run all tests without authorization
 
@@ -42,31 +42,3 @@ To run only one of all test suites
 ```
 npm run test -- <path to suite>
 ```
-
-To run all test with authorization
-
-```
-npm run test:auth
-```
-
-To run only specific test suite with authorization
-
-```
-npm run test:auth -- <path to suite>
-```
-
-### Auto-fix and format
-
-```
-npm run lint
-```
-
-```
-npm run format
-```
-
-### Debugging in VSCode
-
-Press <kbd>F5</kbd> to debug.
-
-For more information, visit: https://code.visualstudio.com/docs/editor/debugging
