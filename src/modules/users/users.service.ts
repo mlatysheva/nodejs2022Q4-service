@@ -17,7 +17,7 @@ export class UsersService {
   };
 
   getOne = async (id: string): Promise<UserModel> => {
-    this.logger.log(`Getting the user by id ${id}`);
+    this.logger.log(`Getting user ${id}`);
     return await this.users.getOne(id);
   };
 
@@ -31,7 +31,7 @@ export class UsersService {
       updatedAt: timing,
     });
 
-    this.logger.log(`User with id ${newUser.id} created`);
+    this.logger.log(`Creating user ${newUser.id}`);
     return await this.users.post(newUser);
   };
 
@@ -50,12 +50,12 @@ export class UsersService {
       version: user.version + 1,
       updatedAt: Date.now(),
     });
-
+    this.logger.log(`Updating user ${id}`);
     return await this.users.update(id, updatedUser);
   };
 
   delete = async (id: string) => {
-    this.logger.log(`Deleting the user with id ${id}`);
+    this.logger.log(`Deleting user ${id}`);
     return await this.users.delete(id);
   };
 }

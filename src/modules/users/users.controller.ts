@@ -99,7 +99,7 @@ export class UsersController {
 
   @Delete(':id')
   @HttpCode(HttpStatus.NO_CONTENT)
-  async delete(
+  async remove(
     @Param(
       'id',
       new ParseUUIDPipe({
