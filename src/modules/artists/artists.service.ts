@@ -3,11 +3,12 @@ import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { v4 as uuid } from 'uuid';
 import { ArtistModel } from './entities/artist.entity';
-import { InMemoryDB } from '../../database/inMemoryDB';
+import { InMemoryDBService } from '../../database/inMemoryDB.service';
 
 @Injectable()
 export class ArtistsService {
-  private artists: InMemoryDB<ArtistModel> = new InMemoryDB<ArtistModel>();
+  constructor(private readonly artists: InMemoryDBService<ArtistModel>) {}
+
   private logger = new Logger(ArtistsService.name);
 
   getAll = async (): Promise<Array<ArtistModel>> => {

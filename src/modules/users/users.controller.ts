@@ -12,6 +12,7 @@ import {
   NotFoundException,
   ForbiddenException,
   BadRequestException,
+  ValidationPipe,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/createUser.dto';
@@ -54,7 +55,10 @@ export class UsersController {
 
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async create(@Body() userData: CreateUserDto) {
+  async create(
+    @Body(new ValidationPipe({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }))
+    userData: CreateUserDto,
+  ) {
     const user = await this.usersService.create(userData);
     const userCopy = { ...user };
     delete userCopy.password;
@@ -72,7 +76,8 @@ export class UsersController {
       }),
     )
     id: string,
-    @Body() { oldPassword, newPassword }: UpdateUserDto,
+    @Body(new ValidationPipe({ errorHttpStatusCode: HttpStatus.BAD_REQUEST }))
+    { oldPassword, newPassword }: UpdateUserDto,
   ) {
     if (!oldPassword || !newPassword) {
       throw new BadRequestException(ErrorMessage.IVALID_BODY);

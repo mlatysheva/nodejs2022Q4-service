@@ -1,6 +1,7 @@
 import { Exclude } from 'class-transformer';
+import { IUser } from '../../../types/types';
 
-export class UserModel {
+export class UserModel implements IUser {
   id: string;
   login: string;
 

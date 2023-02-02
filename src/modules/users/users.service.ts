@@ -4,11 +4,11 @@ import { UpdateUserDto } from './dto/updateUser.dto';
 import { UserModel } from './entities/user.entity';
 import { v4 as uuid } from 'uuid';
 import { ErrorMessage } from '../../constants/errors';
-import { InMemoryDB } from '../../database/inMemoryDB';
+import { InMemoryDBService } from '../../database/inMemoryDB.service';
 
 @Injectable()
 export class UsersService {
-  private users: InMemoryDB<UserModel> = new InMemoryDB<UserModel>();
+  constructor(private readonly users: InMemoryDBService<UserModel>) {}
   private logger = new Logger(UsersService.name);
 
   getAll = async (): Promise<UserModel[]> => {

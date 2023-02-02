@@ -1,4 +1,6 @@
-export class ArtistModel {
+import { IArtist } from '../../../types/types';
+
+export class ArtistModel implements IArtist {
   id: string;
   name: string;
   grammy: boolean;
