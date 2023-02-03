@@ -33,3 +33,9 @@ export interface IFavorites {
   albums: string[]; // favorite albums ids
   tracks: string[]; // favorite tracks ids
 }
+
+export interface IFavoritesResponse {
+  artists: Array<IArtist>;
+  albums: Array<IAlbum>;
+  tracks: Array<ITrack>;
+}

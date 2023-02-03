@@ -22,15 +22,18 @@ import { UUID_VERSION } from '../../constants/uuidVersion';
 export class FavoritesController {
   constructor(
     private readonly favoritesService: FavoritesService,
+    @Inject(forwardRef(() => TracksService))
     private tracksService: TracksService,
+    @Inject(forwardRef(() => ArtistsService))
     private artistsService: ArtistsService,
+    @Inject(forwardRef(() => AlbumsService))
     private albumsService: AlbumsService,
   ) {}
 
   @Get()
   @HttpCode(HttpStatus.OK)
   findAll() {
-    return this.favoritesService.getAll();
+    return this.favoritesService.findAll();
   }
 
   @Post('track/:id')

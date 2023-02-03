@@ -4,20 +4,31 @@ import { UpdateAlbumDto } from './dto/update-album.dto';
 import { v4 as uuid } from 'uuid';
 import { AlbumModel } from './entities/album.entity';
 import { InMemoryDBService } from '../../database/inMemoryDB.service';
+import { TracksService } from '../tracks/tracks.service';
+import { FavoritesService } from '../favorites/favorites.service';
 
 @Injectable()
 export class AlbumsService {
-  constructor(private readonly albums: InMemoryDBService<AlbumModel>) {}
+  private static albums: InMemoryDBService<AlbumModel> =
+    new InMemoryDBService<AlbumModel>();
+
   private logger = new Logger(AlbumsService.name);
+
+  constructor(
+    @Inject(forwardRef(() => TracksService))
+    private tracksService: TracksService,
+    @Inject(forwardRef(() => FavoritesService))
+    private favoritesService: FavoritesService,
+  ) {}
 
   getAll = async (): Promise<AlbumModel[]> => {
     this.logger.log('Getting all albums');
-    return await this.albums.getAll();
+    return await AlbumsService.albums.getAll();
   };
 
   getOne = async (id: string): Promise<AlbumModel> => {
-    this.logger.log('Getting the album by id');
-    return await this.albums.getOne(id);
+    this.logger.log(`Getting album ${id}`);
+    return await AlbumsService.albums.getOne(id);
   };
 
   create = async (albumData: CreateAlbumDto): Promise<AlbumModel> => {
@@ -25,15 +36,15 @@ export class AlbumsService {
       ...albumData,
       id: uuid(),
     };
-    this.logger.log(`Creating user ${newAlbum.id}`);
-    return await this.albums.post(newAlbum);
+    this.logger.log(`Creating album ${newAlbum.id}`);
+    return await AlbumsService.albums.post(newAlbum);
   };
 
   update = async (
     id: string,
     albumData: UpdateAlbumDto,
   ): Promise<AlbumModel> => {
-    const album = await this.albums.getOne(id);
+    const album = await AlbumsService.albums.getOne(id);
     if (!album) {
       return null;
     }
@@ -44,15 +55,18 @@ export class AlbumsService {
     };
 
     this.logger.log(`Updating album ${id}`);
-    return await this.albums.update(id, updatedAlbum);
+    return await AlbumsService.albums.update(id, updatedAlbum);
   };
 
   delete = async (id: string): Promise<boolean> => {
     this.logger.log(`Deleting album ${id}`);
-    return await this.albums.delete(id);
+    await this.tracksService.removeAlbumId(id);
+    // await this.favoritesService.deleteAlbumFromFavorites(id);
+    return await AlbumsService.albums.delete(id);
   };
 
-  removeArtistIdLink = async (id: string): Promise<void> => {
-    await this.albums.removeExternalId(id, 'artistId');
+  removeArtistId = async (id: string): Promise<void> => {
+    this.logger.log(`Removing artist id ${id} from album`);
+    await AlbumsService.albums.setIdToNull(id, 'artistId');
   };
 }

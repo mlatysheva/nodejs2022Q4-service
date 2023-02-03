@@ -3,4 +3,5 @@ export enum ErrorMessage {
   'NOT_FOUND' = 'Required item is not found in the database',
   'IVALID_BODY' = 'Required fields have not been provided',
   'NO_CONTENT' = 'The item has no content',
+  'ALREADY_EXISTS' = 'The item already exists in favorites',
 }

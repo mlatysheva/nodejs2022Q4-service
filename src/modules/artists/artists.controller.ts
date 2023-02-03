@@ -93,8 +93,7 @@ export class ArtistsController {
     if (!artist) {
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
-    // this.tracksService.setArtistIdToNull(id);
-    // this.albumsService.setArtistIdToNull(id);
+
     return await this.artistsService.delete(id);
   }
 }

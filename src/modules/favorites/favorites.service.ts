@@ -9,13 +9,13 @@ import {
 import { AlbumsService } from '../albums/albums.service';
 import { ArtistsService } from '../artists/artists.service';
 import { TracksService } from '../tracks/tracks.service';
-import { FavoritesResponse } from './entities/favoritesResponse.entity';
 import { FavoritesModel } from './entities/favorites.entity';
+import { FavoritesResponse } from './entities/favoritesResponse.entity';
 import { ErrorMessage } from '../../constants/errors';
 
 @Injectable()
 export class FavoritesService {
-  private favorites: FavoritesModel = {
+  private static favorites: FavoritesModel = {
     artists: [],
     albums: [],
     tracks: [],
@@ -23,8 +23,11 @@ export class FavoritesService {
   private logger = new Logger(FavoritesService.name);
 
   constructor(
+    @Inject(forwardRef(() => TracksService))
     private tracksService: TracksService,
+    @Inject(forwardRef(() => ArtistsService))
     private artistsService: ArtistsService,
+    @Inject(forwardRef(() => AlbumsService))
     private albumsService: AlbumsService,
   ) {}
 
@@ -34,12 +37,14 @@ export class FavoritesService {
     } catch {
       throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
     }
-    const doesExist = this.favorites.tracks.includes(trackId);
+    const doesExist = await FavoritesService.favorites.tracks.includes(trackId);
     if (doesExist) {
-      throw new UnprocessableEntityException(ErrorMessage.ALREADY_EXISTS);
+      throw new UnprocessableEntityException(
+        'Track already exists in favorites',
+      );
     } else {
       this.logger.log(`Adding track ${trackId} to favorites`);
-      return this.favorites.tracks.push(trackId);
+      return await FavoritesService.favorites.tracks.push(trackId);
     }
   }
 
@@ -49,39 +54,45 @@ export class FavoritesService {
     } catch {
       throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
     }
-    const doesExist = this.favorites.albums.includes(albumId);
+    const doesExist = await FavoritesService.favorites.albums.includes(albumId);
     if (doesExist) {
-      throw new UnprocessableEntityException(ErrorMessage.ALREADY_EXISTS);
+      throw new UnprocessableEntityException(
+        'Album already exists in favorites',
+      );
     } else {
       this.logger.log(`Adding album ${albumId} to favorites`);
-      return this.favorites.albums.push(albumId);
+
+      return FavoritesService.favorites.albums.push(albumId);
     }
   }
 
-  async addArtistToFavorites(artistId: string) {
+  public addArtistToFavorites(artistId: string) {
     try {
-      await this.artistsService.getOne(artistId);
+      this.artistsService.getOne(artistId);
     } catch {
       throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
     }
-    const doesExist = this.favorites.artists.includes(artistId);
+    const doesExist = FavoritesService.favorites.artists.includes(artistId);
     if (doesExist) {
-      throw new UnprocessableEntityException(ErrorMessage.ALREADY_EXISTS);
+      throw new UnprocessableEntityException(
+        'Artist already exists in favorites',
+      );
     } else {
       this.logger.log(`Adding artist ${artistId} to favorites`);
-      return this.favorites.artists.push(artistId);
+
+      return FavoritesService.favorites.artists.push(artistId);
     }
   }
 
-  async getAll() {
+  async findAll() {
     const favoritesResponse: FavoritesResponse = {
       artists: [],
       albums: [],
       tracks: [],
     };
-    const tracks = this.favorites.tracks;
-    const albums = this.favorites.albums;
-    const artists = this.favorites.artists;
+    const tracks = FavoritesService.favorites.tracks;
+    const albums = FavoritesService.favorites.albums;
+    const artists = FavoritesService.favorites.artists;
     try {
       for (const track of tracks) {
         favoritesResponse.tracks.push(await this.tracksService.getOne(track));
@@ -94,50 +105,56 @@ export class FavoritesService {
           await this.artistsService.getOne(artist),
         );
       }
-      this.logger.log(`Getting all favorites`);
+      this.logger.log(
+        `Getting all favorites ${favoritesResponse.albums.length}`,
+      );
 
       return favoritesResponse;
     } catch {
-      throw new BadRequestException(ErrorMessage.NO_CONTENT);
+      throw new BadRequestException(ErrorMessage.NOT_FOUND);
     }
   }
 
   deleteTrackFromFavorites(trackId: string) {
-    const index = this.favorites.tracks.indexOf(trackId);
+    const index = FavoritesService.favorites.tracks.indexOf(trackId);
     if (index === -1) {
       throw new BadRequestException(ErrorMessage.NOT_FOUND);
     } else {
-      this.logger.log(`Deleting track ${trackId} from favorites`);
+      FavoritesService.favorites.tracks =
+        FavoritesService.favorites.tracks.filter((track) => {
+          track !== trackId;
+        });
+      this.logger.log(`Deleting track ${trackId} to favorites`);
 
-      this.favorites.tracks = this.favorites.tracks.filter((track) => {
-        track !== trackId;
-      });
+      return true;
     }
   }
 
   deleteAlbumFromFavorites(albumId: string) {
-    const index = this.favorites.albums.indexOf(albumId);
+    const index = FavoritesService.favorites.albums.indexOf(albumId);
     if (index === -1) {
       throw new BadRequestException(ErrorMessage.NOT_FOUND);
     } else {
-      this.logger.log(`Deleting album ${albumId} from favorites`);
-
-      this.favorites.albums = this.favorites.albums.filter((album) => {
-        album !== albumId;
-      });
+      FavoritesService.favorites.albums =
+        FavoritesService.favorites.albums.filter((album) => {
+          album !== albumId;
+        });
+      this.logger.log(`Deleting album ${albumId} to favorites`);
+      return true;
     }
   }
 
   deleteArtistFromFavorites(artistId: string) {
-    const index = this.favorites.artists.indexOf(artistId);
+    const index = FavoritesService.favorites.artists.indexOf(artistId);
     if (index === -1) {
       throw new BadRequestException(ErrorMessage.NOT_FOUND);
     } else {
-      this.logger.log(`Deleting artist ${artistId} from favorites`);
-
-      this.favorites.artists = this.favorites.artists.filter((artist) => {
-        artist !== artistId;
-      });
+      FavoritesService.favorites.artists =
+        FavoritesService.favorites.artists.filter((artist) => {
+          artist !== artistId;
+        });
+      this.logger.log(`Deleting artist ${artistId} to favorites`);
+      return true;
     }
   }
 }

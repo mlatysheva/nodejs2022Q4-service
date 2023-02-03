@@ -5,6 +5,9 @@ import { TracksService } from '../tracks/tracks.service';
 import { AlbumsService } from '../albums/albums.service';
 import { ArtistsService } from '../artists/artists.service';
 import { InMemoryDBService } from '../../database/inMemoryDB.service';
+import { AlbumsModule } from '../albums/albums.module';
+import { ArtistsModule } from '../artists/artists.module';
+import { TracksModule } from '../tracks/tracks.module';
 
 @Module({
   controllers: [FavoritesController],

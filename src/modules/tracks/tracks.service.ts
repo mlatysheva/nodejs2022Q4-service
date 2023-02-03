@@ -1,23 +1,32 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { v4 as uuid } from 'uuid';
 import { TrackModel } from './entities/track.entity';
 import { InMemoryDBService } from '../../database/inMemoryDB.service';
+import { FavoritesService } from '../favorites/favorites.service';
+import { AlbumsService } from '../albums/albums.service';
+import { ArtistsService } from '../artists/artists.service';
 
 @Injectable()
 export class TracksService {
-  constructor(private readonly tracks: InMemoryDBService<TrackModel>) {}
+  private static tracks: InMemoryDBService<TrackModel> =
+    new InMemoryDBService<TrackModel>();
   private logger = new Logger(TracksService.name);
+
+  constructor(
+    @Inject(forwardRef(() => FavoritesService))
+    private favoritesService: FavoritesService,
+  ) {}
 
   getAll = async () => {
     this.logger.log('Getting all tracks');
-    return await this.tracks.getAll();
+    return await TracksService.tracks.getAll();
   };
 
   getOne = async (id: string) => {
     this.logger.log(`Getting track ${id}`);
-    return await this.tracks.getOne(id);
+    return await TracksService.tracks.getOne(id);
   };
 
   create = async (trackData: CreateTrackDto) => {
@@ -25,12 +34,14 @@ export class TracksService {
       ...trackData,
       id: uuid(),
     });
-    this.logger.log(`Creating track ${newTrack.id}`);
-    return await this.tracks.post(newTrack);
+    this.logger.log(
+      `Creating track ${newTrack.id}, albumid is ${newTrack.albumId}`,
+    );
+    return await TracksService.tracks.post(newTrack);
   };
 
   update = async (id: string, trackData: UpdateTrackDto) => {
-    const track = await this.tracks.getOne(id);
+    const track = await TracksService.tracks.getOne(id);
     if (!track) {
       return null;
     }
@@ -42,19 +53,26 @@ export class TracksService {
 
     this.logger.log(`Updating track ${id}`);
 
-    return await this.tracks.update(id, updatedTrack);
+    return await TracksService.tracks.update(id, updatedTrack);
   };
 
   delete = async (id: string) => {
     this.logger.log(`Deleting track ${id}`);
-    return await this.tracks.delete(id);
+    // await this.favoritesService.deleteTrackFromFavorites(id);
+    return await TracksService.tracks.delete(id);
   };
 
   removeArtistId = async (id: string) => {
-    await this.tracks.removeExternalId(id, 'artistId');
+    this.logger.log(`Removing artist ${id} from tracks`);
+
+    await TracksService.tracks.setIdToNull(id, 'artistId');
   };
 
   removeAlbumId = async (id: string) => {
-    await this.tracks.removeExternalId(id, 'albumId');
+    this.logger.log(`Removing album ${id} from tracks`);
+    this.logger.log(
+      `Number of tracks is ${(await TracksService.tracks.getAll()).length}`,
+    );
+    await TracksService.tracks.setIdToNull(id, 'albumId');
   };
 }
