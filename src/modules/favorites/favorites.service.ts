@@ -36,7 +36,7 @@ export class FavoritesService {
     return arr.filter((item) => item);
   }
 
-  findAll = async (): Promise<IFavoritesResponse> => {
+  getAll = async (): Promise<IFavoritesResponse> => {
     const artists = await Promise.allSettled(
       FavoritesService.favorites.artists.map((artistId) =>
         this.artistService.getOne(artistId),
@@ -62,7 +62,7 @@ export class FavoritesService {
     };
   };
 
-  createAlbum = async (id: string): Promise<AlbumModel | null> => {
+  addAlbum = async (id: string): Promise<AlbumModel | null> => {
     const album = await this.albumService.getOne(id);
 
     if (!album) {
@@ -94,7 +94,7 @@ export class FavoritesService {
     return true;
   };
 
-  createArtist = async (id: string): Promise<ArtistModel | null> => {
+  addArtist = async (id: string): Promise<ArtistModel | null> => {
     const artist = await this.artistService.getOne(id);
 
     if (!artist) {
@@ -127,7 +127,7 @@ export class FavoritesService {
     return true;
   };
 
-  createTrack = async (id: string): Promise<TrackModel | null> => {
+  addTrack = async (id: string): Promise<TrackModel | null> => {
     const track = await this.trackService.getOne(id);
 
     if (!track) {

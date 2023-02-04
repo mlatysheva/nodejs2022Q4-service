@@ -44,9 +44,6 @@ export class ArtistsController {
     if (!artist) {
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
-    // if (Object(artist).id === undefined) {
-    //   throw new HttpException('Artist entry is empty.', HttpStatus.NO_CONTENT);
-    // }
     return artist;
   }
 

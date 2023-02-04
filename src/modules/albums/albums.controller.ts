@@ -16,7 +16,6 @@ import {
 import { AlbumsService } from './albums.service';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { AlbumModel } from './entities/album.entity';
 import { UUID_VERSION } from '../../constants/uuidVersion';
 import { ErrorMessage } from '../../constants/errors';
 

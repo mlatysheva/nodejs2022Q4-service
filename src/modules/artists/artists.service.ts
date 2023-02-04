@@ -63,15 +63,9 @@ export class ArtistsService {
 
   delete = async (id: string) => {
     this.logger.log(`Deleting artist ${id}`);
-    this.logger.log(
-      `tracksService is ${(await this.tracksService.getAll()).length}`,
-    );
-    this.logger.log(
-      `albumsService is ${(await this.albumsService.getAll()).length}`,
-    );
     await this.tracksService.removeArtistId(id);
     await this.albumsService.removeArtistId(id);
-    // await this.favoritesService.deleteArtistFromFavorites(id);
+    await this.favoritesService.removeArtist(id);
     return await ArtistsService.artists.delete(id);
   };
 }

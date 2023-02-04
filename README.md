@@ -1,8 +1,8 @@
 # Home Library Service
 
 This is a Nestjs RESTful music library application that can do the following:
-- create and update the user
-- create, update and delete a track, get a signle track by id and get all tracks
+- create and update a user
+- create, update and delete a track, get a single track by id and get all tracks
 - create, update and delete an artist, get a single artist by id and get all artists
 - create, update and delete an album, get a single album by id and get all albums
 - add, update and delete a track, artist or album to/from the user's favorites
@@ -23,10 +23,15 @@ This is a Nestjs RESTful music library application that can do the following:
 - Run `npm run start` to run the application in the production mode
 - Run `npm run start:dev` to run the application in the development mode
 - Once the application is running, you can make CRUD requests to the relevant endpoints
-- The is a swagger file showing available endpoints and required request body and response body.
+- There is a swagger file showing available endpoints and required request body and response body.
+
+[![Swagger api](screenshots/screenshot_swagger_api.png)]
+[![Swagger track](screenshots/screenshot_swagger_track.png)]
+
+
 After starting the app on port (4000 as default) you can open in your browser OpenAPI documentation by typing http://localhost:4000/doc/
 
-[![Postman Requests](https://raw.githubusercontent.com/mlatysheva/nodejs2024Q2-service/develop/screenshot_postman.png)]
+[![Sample of a Postman Request](screenshots/screenshot_postman_track.png)]
 ## Testing
 
 Once the application is running, open new terminal and enter:

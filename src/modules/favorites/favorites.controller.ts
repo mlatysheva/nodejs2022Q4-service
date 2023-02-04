@@ -21,7 +21,7 @@ export class FavoritesController {
   @Get()
   @HttpCode(StatusCodes.OK)
   async findAll() {
-    return await this.favoritesService.findAll();
+    return await this.favoritesService.getAll();
   }
 
   @Post('album/:id')
@@ -36,7 +36,7 @@ export class FavoritesController {
     )
     id: string,
   ) {
-    const album = await this.favoritesService.createAlbum(id);
+    const album = await this.favoritesService.addAlbum(id);
 
     if (!album) {
       throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
@@ -77,7 +77,7 @@ export class FavoritesController {
     )
     id: string,
   ) {
-    const artist = await this.favoritesService.createArtist(id);
+    const artist = await this.favoritesService.addArtist(id);
 
     if (!artist) {
       throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
@@ -118,7 +118,7 @@ export class FavoritesController {
     )
     id: string,
   ) {
-    const track = await this.favoritesService.createTrack(id);
+    const track = await this.favoritesService.addTrack(id);
 
     if (!track) {
       throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);

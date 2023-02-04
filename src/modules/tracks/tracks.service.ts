@@ -4,8 +4,6 @@ import { UpdateTrackDto } from './dto/update-track.dto';
 import { v4 as uuid } from 'uuid';
 import { TrackModel } from './entities/track.entity';
 import { InMemoryDBService } from '../../database/inMemoryDB.service';
-import { AlbumsService } from '../albums/albums.service';
-import { ArtistsService } from '../artists/artists.service';
 import { FavoritesService } from '../favorites/favorites.service';
 
 @Injectable()
@@ -34,9 +32,7 @@ export class TracksService {
       ...trackData,
       id: uuid(),
     });
-    this.logger.log(
-      `Creating track ${newTrack.id}, albumid is ${newTrack.albumId}`,
-    );
+    this.logger.log(`Creating track ${newTrack.id}`);
     return await TracksService.tracks.post(newTrack);
   };
 
@@ -58,21 +54,15 @@ export class TracksService {
 
   delete = async (id: string) => {
     this.logger.log(`Deleting track ${id}`);
-    // await this.favoritesService.deleteTrackFromFavorites(id);
+    await this.favoritesService.removeTrack(id);
     return await TracksService.tracks.delete(id);
   };
 
   removeArtistId = async (id: string) => {
-    this.logger.log(`Removing artist ${id} from tracks`);
-
     await TracksService.tracks.setIdToNull(id, 'artistId');
   };
 
   removeAlbumId = async (id: string) => {
-    this.logger.log(`Removing album ${id} from tracks`);
-    this.logger.log(
-      `Number of tracks is ${(await TracksService.tracks.getAll()).length}`,
-    );
     await TracksService.tracks.setIdToNull(id, 'albumId');
   };
 }

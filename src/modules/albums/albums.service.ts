@@ -61,12 +61,11 @@ export class AlbumsService {
   delete = async (id: string): Promise<boolean> => {
     this.logger.log(`Deleting album ${id}`);
     await this.tracksService.removeAlbumId(id);
-    // await this.favoritesService.deleteAlbumFromFavorites(id);
+    await this.favoritesService.removeAlbum(id);
     return await AlbumsService.albums.delete(id);
   };
 
   removeArtistId = async (id: string): Promise<void> => {
-    this.logger.log(`Removing artist id ${id} from album`);
     await AlbumsService.albums.setIdToNull(id, 'artistId');
   };
 }
