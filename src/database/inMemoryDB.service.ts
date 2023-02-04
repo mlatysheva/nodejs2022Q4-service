@@ -1,11 +1,8 @@
-import { Logger } from '@nestjs/common';
-
 interface BasicItem {
   id: string;
 }
 export class InMemoryDBService<T extends BasicItem> {
   private array: Array<T> = [];
-  private logger = new Logger(InMemoryDBService.name);
 
   getAll = async (): Promise<Array<T>> => {
     return this.array;
@@ -55,23 +52,10 @@ export class InMemoryDBService<T extends BasicItem> {
   };
 
   setIdToNull = async (id: string, field: keyof T) => {
-    this.logger.log(
-      `setting to Null id ${id} field ${String(field)} on ${this.array[0]}`,
-    );
-
-    this.logger.log(
-      `array 1 ${this.array.forEach((element) => {
-        this.logger.log(`element is ${element}`);
-      })}`,
-    );
     const searchField = String(field);
 
     this.array = this.array.map((item) => {
-      this.logger.log(`item[field] is ${item[searchField]}`);
       for (const [key, value] of Object.entries(item)) {
-        this.logger.log(
-          `key is ${key} value is ${value} searchField is ${searchField}`,
-        );
         if (key == searchField && value == id) {
           const updatedItem = { ...item };
           updatedItem[searchField] = null;

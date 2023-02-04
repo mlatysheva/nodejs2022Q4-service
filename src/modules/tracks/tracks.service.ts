@@ -4,9 +4,9 @@ import { UpdateTrackDto } from './dto/update-track.dto';
 import { v4 as uuid } from 'uuid';
 import { TrackModel } from './entities/track.entity';
 import { InMemoryDBService } from '../../database/inMemoryDB.service';
-import { FavoritesService } from '../favorites/favorites.service';
 import { AlbumsService } from '../albums/albums.service';
 import { ArtistsService } from '../artists/artists.service';
+import { FavoritesService } from '../favorites/favorites.service';
 
 @Injectable()
 export class TracksService {

@@ -1,22 +1,12 @@
-import { Module, forwardRef } from '@nestjs/common';
+import { Module } from '@nestjs/common';
 import { FavoritesService } from './favorites.service';
 import { FavoritesController } from './favorites.controller';
-import { TracksService } from '../tracks/tracks.service';
 import { AlbumsService } from '../albums/albums.service';
 import { ArtistsService } from '../artists/artists.service';
-import { InMemoryDBService } from '../../database/inMemoryDB.service';
-import { AlbumsModule } from '../albums/albums.module';
-import { ArtistsModule } from '../artists/artists.module';
-import { TracksModule } from '../tracks/tracks.module';
+import { TracksService } from '../tracks/tracks.service';
 
 @Module({
   controllers: [FavoritesController],
-  providers: [
-    FavoritesService,
-    AlbumsService,
-    TracksService,
-    ArtistsService,
-    InMemoryDBService,
-  ],
+  providers: [FavoritesService, AlbumsService, ArtistsService, TracksService],
 })
 export class FavoritesModule {}

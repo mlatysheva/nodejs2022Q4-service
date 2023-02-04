@@ -4,143 +4,146 @@ import {
   Post,
   Param,
   Delete,
-  HttpStatus,
-  HttpCode,
-  HttpException,
-  UnprocessableEntityException,
-  Inject,
-  forwardRef,
   ParseUUIDPipe,
+  HttpCode,
+  NotFoundException,
+  UnprocessableEntityException,
 } from '@nestjs/common';
+import { StatusCodes } from 'http-status-codes';
 import { FavoritesService } from './favorites.service';
-import { TracksService } from '../tracks/tracks.service';
-import { AlbumsService } from '../albums/albums.service';
-import { ArtistsService } from '../artists/artists.service';
 import { UUID_VERSION } from '../../constants/uuidVersion';
+import { ErrorMessage } from '../../constants/errors';
 
 @Controller('favs')
 export class FavoritesController {
-  constructor(
-    private readonly favoritesService: FavoritesService,
-    @Inject(forwardRef(() => TracksService))
-    private tracksService: TracksService,
-    @Inject(forwardRef(() => ArtistsService))
-    private artistsService: ArtistsService,
-    @Inject(forwardRef(() => AlbumsService))
-    private albumsService: AlbumsService,
-  ) {}
+  constructor(private readonly favoritesService: FavoritesService) {}
 
   @Get()
-  @HttpCode(HttpStatus.OK)
-  findAll() {
-    return this.favoritesService.findAll();
-  }
-
-  @Post('track/:id')
-  @HttpCode(HttpStatus.CREATED)
-  addTrackToFavorites(
-    @Param(
-      'id',
-      new ParseUUIDPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-        version: UUID_VERSION,
-      }),
-    )
-    id: string,
-  ) {
-    if (!this.tracksService.getOne(id)) {
-      throw new UnprocessableEntityException('Track not found.');
-    }
-    return this.favoritesService.addTrackToFavorites(id);
+  @HttpCode(StatusCodes.OK)
+  async findAll() {
+    return await this.favoritesService.findAll();
   }
 
   @Post('album/:id')
-  @HttpCode(HttpStatus.CREATED)
-  addAlbumToFavorites(
+  @HttpCode(StatusCodes.CREATED)
+  async createAlbum(
     @Param(
       'id',
       new ParseUUIDPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+        errorHttpStatusCode: StatusCodes.BAD_REQUEST as number,
         version: UUID_VERSION,
       }),
     )
     id: string,
   ) {
-    if (!this.albumsService.getOne(id)) {
-      throw new UnprocessableEntityException('Album not found.');
-    }
-    return this.favoritesService.addAlbumToFavorites(id);
-  }
+    const album = await this.favoritesService.createAlbum(id);
 
-  @Post('artist/:id')
-  @HttpCode(HttpStatus.CREATED)
-  addArtistToFavorites(
-    @Param(
-      'id',
-      new ParseUUIDPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-        version: UUID_VERSION,
-      }),
-    )
-    id: string,
-  ) {
-    if (!this.artistsService.getOne(id)) {
-      throw new UnprocessableEntityException('Artist not found.');
+    if (!album) {
+      throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
     }
-    return this.favoritesService.addArtistToFavorites(id);
-  }
-
-  @Delete('track/:id')
-  @HttpCode(204)
-  deleteTrackFromFavorites(
-    @Param(
-      'id',
-      new ParseUUIDPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
-        version: UUID_VERSION,
-      }),
-    )
-    id: string,
-  ) {
-    if (!this.tracksService.getOne(id)) {
-      throw new UnprocessableEntityException('Track not found.');
-    }
-    return this.favoritesService.deleteTrackFromFavorites(id);
+    return album;
   }
 
   @Delete('album/:id')
-  @HttpCode(204)
-  deleteAlbumFromFavorites(
+  @HttpCode(StatusCodes.NO_CONTENT)
+  async removeAlbum(
     @Param(
       'id',
       new ParseUUIDPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+        errorHttpStatusCode: StatusCodes.BAD_REQUEST as number,
         version: UUID_VERSION,
       }),
     )
     id: string,
   ) {
-    if (!this.albumsService.getOne(id)) {
-      throw new UnprocessableEntityException('Album not found.');
+    const album = await this.favoritesService.removeAlbum(id);
+
+    if (!album) {
+      throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
-    return this.favoritesService.deleteAlbumFromFavorites(id);
+
+    return album;
+  }
+
+  @Post('artist/:id')
+  @HttpCode(StatusCodes.CREATED)
+  async createArtist(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        errorHttpStatusCode: StatusCodes.BAD_REQUEST as number,
+        version: UUID_VERSION,
+      }),
+    )
+    id: string,
+  ) {
+    const artist = await this.favoritesService.createArtist(id);
+
+    if (!artist) {
+      throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
+    }
+    return artist;
   }
 
   @Delete('artist/:id')
-  @HttpCode(204)
-  deleteArtistFromFavorites(
+  @HttpCode(StatusCodes.NO_CONTENT)
+  async removeArtist(
     @Param(
       'id',
       new ParseUUIDPipe({
-        errorHttpStatusCode: HttpStatus.BAD_REQUEST,
+        errorHttpStatusCode: StatusCodes.BAD_REQUEST as number,
         version: UUID_VERSION,
       }),
     )
     id: string,
   ) {
-    if (!this.artistsService.getOne(id)) {
-      throw new UnprocessableEntityException('Artist not found.');
+    const artist = await this.favoritesService.removeArtist(id);
+
+    if (!artist) {
+      throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
-    return this.favoritesService.deleteArtistFromFavorites(id);
+
+    return artist;
+  }
+
+  @Post('track/:id')
+  @HttpCode(StatusCodes.CREATED)
+  async createTrack(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        errorHttpStatusCode: StatusCodes.BAD_REQUEST as number,
+        version: UUID_VERSION,
+      }),
+    )
+    id: string,
+  ) {
+    const track = await this.favoritesService.createTrack(id);
+
+    if (!track) {
+      throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
+    }
+    return track;
+  }
+
+  @Delete('track/:id')
+  @HttpCode(StatusCodes.NO_CONTENT)
+  async removeTrack(
+    @Param(
+      'id',
+      new ParseUUIDPipe({
+        errorHttpStatusCode: StatusCodes.BAD_REQUEST as number,
+        version: UUID_VERSION,
+      }),
+    )
+    id: string,
+  ) {
+    const track = await this.favoritesService.removeTrack(id);
+
+    if (!track) {
+      throw new NotFoundException(ErrorMessage.NOT_FOUND);
+    }
+
+    return track;
   }
 }
