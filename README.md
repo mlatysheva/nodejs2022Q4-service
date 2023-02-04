@@ -25,13 +25,13 @@ This is a Nestjs RESTful music library application that can do the following:
 - Once the application is running, you can make CRUD requests to the relevant endpoints
 - There is a swagger file showing available endpoints and required request body and response body.
 
-[![Swagger api](screenshots/screenshot_swagger_api.png)]
-[![Swagger track](screenshots/screenshot_swagger_track.png)]
+![Swagger api](screenshots/screenshot_swagger_api.png)
+![Swagger track](screenshots/screenshot_swagger_track.png)
 
 
 After starting the app on port (4000 as default) you can open in your browser OpenAPI documentation by typing http://localhost:4000/doc/
 
-[![Sample of a Postman Request](screenshots/screenshot_postman_track.png)]
+![Sample of a Postman Request](screenshots/screenshot_postman_track.png)
 ## Testing
 
 Once the application is running, open new terminal and enter:
@@ -47,3 +47,4 @@ To run only one of all test suites
 ```
 npm run test -- <path to suite>
 ```
+![Results of the tests](screenshots/screenshot_test.png)
