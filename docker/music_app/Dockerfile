@@ -1,22 +1,24 @@
-FROM node:lts-alpine
-# FROM --platform=linux/amd64 node:18-alpine
+FROM node:18-alpine as development
 
-RUN mkdir -p /usr/app
 # Create app directory
 WORKDIR /usr/app
-
-RUN npm prune --production
-
-COPY package*.json ./
-
-# Install app dependencies
-RUN npm install
-
+# RUN npm prune --production
+COPY package*.json .
+# Install dev dependencies
+RUN npm install --only=development
 # Bundle app source
 COPY . .
-
 COPY .env.example .env
+RUN npm run build
 
+FROM node:18-alpine as production
+ARG NODE_ENV=production
+ENV NODE_ENV=${NODE_ENV}
+WORKDIR /usr/app
+COPY package*.json .
+RUN npm install --only=production
+COPY . .
+COPY --from=development /usr/app/dist dist
+COPY --from=development /usr/app/node_modules node_modules
 EXPOSE ${PORT}
-
-CMD ["npm", "run", "start:dev"]
+CMD ["node", "dist/main"]

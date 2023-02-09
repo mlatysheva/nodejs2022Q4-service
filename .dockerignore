@@ -1,14 +1,10 @@
 .git
 .gitignore
 .dockerignore
-dist
+# dist
 node_modules
 /node_modules
 docker
-doc
 screenshots
-.env
 README.md
 .idea
-postgres
-test

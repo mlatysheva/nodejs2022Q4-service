@@ -14,11 +14,7 @@ services:
     depends_on:
       - music_db
     volumes:
-      - type: bind
-        source: ./src
-        target: /usr/app/src
-      # - music_app:/usr/app/src
-      - /usr/app/node_modules
+      - music_app:/var/lib/music_app/data
     networks:
       - music_bridge
     restart: always
