@@ -1,2 +1,14 @@
+.git
+.gitignore
+.dockerignore
+dist
 node_modules
-npm-debug.log
+/node_modules
+docker
+doc
+screenshots
+.env
+README.md
+.idea
+postgres
+test

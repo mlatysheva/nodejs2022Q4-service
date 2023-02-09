@@ -1,27 +1,27 @@
 version: '3.8'
 services:
   music_app:
-      image: music_app_image
-      container_name: music_app_container
-      build:
-        context: .
-        dockerfile: ./docker/music_app/Dockerfile
-      ports:
-        - "${PORT}:${PORT}"
-      env_file: .env
-      environment:
-        PORT: "${PORT}"
-      depends_on:
-        - music_db
-      volumes:
-        - type: bind
-          source: ./src
-          target: /app/music/src
-        - /app/music/node_modules
-      networks:
-        - music_bridge
-      restart: always
-      
+    image: music_app_image
+    container_name: music_app_container
+    build:
+      context: .
+      dockerfile: ./docker/music_app/Dockerfile
+    ports:
+      - "${PORT}:${PORT}"
+    env_file: .env
+    environment:
+      PORT: "${PORT}"
+    depends_on:
+      - music_db
+    volumes:
+      - type: bind
+        source: ./src
+        target: /usr/app/src
+      # - music_app:/usr/app/src
+      - /usr/app/node_modules
+    networks:
+      - music_bridge
+    restart: always
 
   music_db:
     image: music_db_image
@@ -42,7 +42,6 @@ services:
     networks:
       - music_bridge
 
-
 volumes:
   music_db:
     driver: local
@@ -50,7 +49,7 @@ volumes:
   music_app:
     driver: local
     name: 'music_app'
-    
+
 networks:
   music_bridge:
     name: 'music_bridge'

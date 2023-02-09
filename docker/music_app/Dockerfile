@@ -1,7 +1,11 @@
 FROM node:lts-alpine
+# FROM --platform=linux/amd64 node:18-alpine
 
+RUN mkdir -p /usr/app
 # Create app directory
-WORKDIR /app/music
+WORKDIR /usr/app
+
+RUN npm prune --production
 
 COPY package*.json ./
 
