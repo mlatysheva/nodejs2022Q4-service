@@ -69,12 +69,12 @@ npm run test -- <path to suite>
 - Run `npm run docker:test` to run the e2e tests inside the docker
 
 
-[![Docker images](https://raw.githubusercontent.com/mlatysheva/nodejs2022Q2-service/containerization-docker/screenshot_images_sizes.png)]
+![Docker images](screenshots/screenshot_imageSize.png)
 
-- The image of the application is 432 Mb
+- The image of the application is 428 Mb
 - There is a `user-defined bridge`
 - The app container restarts after crashing
-- The built image has been pushed to Docker Hub at https://hub.docker.com/repository/docker/mlatysheva/music_app
+- Upon changes in the local `src` folder, the app launched in the docker container restarts
+- The built image has been pushed to Docker Hub at https://hub.docker.com/repository/docker/mlatysheva/music_app_image/general
 
-[![Vulnerabilities Check for the app](https://raw.githubusercontent.com/mlatysheva/nodejs2022Q2-service/containerization-docker/screenshot_app_vulnerabilities.png)]
-[![Vulnerabilities Check for the database](https://raw.githubusercontent.com/mlatysheva/nodejs2022Q2-service/containerization-docker/screenshot_db_vulnerabilities.png)]
+![Docker Hub](screenshots/screenshot_pushed_to_DockerHub.png)
