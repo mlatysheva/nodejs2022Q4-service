@@ -3,9 +3,7 @@ services:
   music_app:
     image: music_app_image
     container_name: music_app_container
-    build:
-      context: .
-      dockerfile: ./Dockerfile
+    build: .
     ports:
       - "${PORT}:${PORT}"
     env_file: .env
@@ -14,8 +12,8 @@ services:
     depends_on:
       - music_db
     volumes:
-      - ./:/usr/src/app/
-      - /usr/src/app/node_modules
+      - ./:/usr/app/
+      - /usr/app/node_modules
     networks:
       - music_bridge
     restart: always
@@ -23,9 +21,7 @@ services:
   music_db:
     image: music_db_image
     container_name: music_db_container
-    build:
-      context: .
-      dockerfile: ./docker/music_db/Dockerfile
+    build: ./database/
     ports:
       - "${POSTGRES_PORT}:${POSTGRES_PORT}"
     env_file: .env
