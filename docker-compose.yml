@@ -5,7 +5,7 @@ services:
     container_name: music_app_container
     build:
       context: .
-      dockerfile: ./docker/music_app/Dockerfile
+      dockerfile: ./Dockerfile
     ports:
       - "${PORT}:${PORT}"
     env_file: .env
@@ -14,7 +14,8 @@ services:
     depends_on:
       - music_db
     volumes:
-      - music_app:/var/lib/music_app/data
+      - ./:/usr/src/app/
+      - /usr/src/app/node_modules
     networks:
       - music_bridge
     restart: always
@@ -42,9 +43,6 @@ volumes:
   music_db:
     driver: local
     name: 'music_db'
-  music_app:
-    driver: local
-    name: 'music_app'
 
 networks:
   music_bridge:
