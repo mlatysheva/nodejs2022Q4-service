@@ -1,18 +1,49 @@
 import { Exclude } from 'class-transformer';
-import { IUser } from '../../../types/types';
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  CreateDateColumn,
+  UpdateDateColumn,
+} from 'typeorm';
 
-export class UserModel implements IUser {
+@Entity('user')
+export class UserEntity {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
   login: string;
 
+  @Column()
   @Exclude()
   password: string;
 
+  @Column()
   version: number;
+
+  @CreateDateColumn({
+    transformer: {
+      from: (value: Date) => value.getTime(),
+      to: (value: Date) => value,
+    },
+  })
   createdAt: number;
+
+  @UpdateDateColumn({
+    transformer: {
+      from: (value: Date) => value.getTime(),
+      to: (value: Date) => value,
+    },
+  })
   updatedAt: number;
 
-  constructor(partial: Partial<UserModel>) {
+  toResponse() {
+    const { id, login, version, createdAt, updatedAt } = this;
+    return { id, login, version, createdAt, updatedAt };
+  }
+
+  constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);
   }
 }
