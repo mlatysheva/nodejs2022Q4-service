@@ -1,16 +1,7 @@
-import {
-  Injectable,
-  Logger,
-  Inject,
-  forwardRef,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateAlbumDto } from './dto/create-album.dto';
 import { UpdateAlbumDto } from './dto/update-album.dto';
-import { v4 as uuid } from 'uuid';
 import { AlbumEntity } from './entities/album.entity';
-import { TracksService } from '../tracks/tracks.service';
-import { FavoritesService } from '../favorites/favorites.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { ArtistsService } from '../artists/artists.service';
@@ -20,64 +11,56 @@ import { ErrorMessage } from '../../constants/errors';
 export class AlbumsService {
   constructor(
     @InjectRepository(AlbumEntity)
-    private albumsRepository: Repository<AlbumEntity>,
+    private albumsService: Repository<AlbumEntity>,
     private artistsService: ArtistsService,
   ) {}
 
   private logger = new Logger(AlbumsService.name);
 
+  checkArtistExists = async (artistId: string) => {
+    const artist = await this.artistsService.getOne(artistId);
+    if (!artist) {
+      return null;
+    } else {
+      return artistId;
+    }
+  };
   getAll = async (): Promise<AlbumEntity[]> => {
     this.logger.log('Getting all albums');
-    return await this.albumsRepository.find();
+    return await this.albumsService.find();
   };
 
   getOne = async (id: string): Promise<AlbumEntity> => {
     this.logger.log(`Getting album ${id}`);
-    return await this.albumsRepository.findOneBy({ id });
+    return await this.albumsService.findOneBy({ id });
   };
 
   create = async (albumData: CreateAlbumDto): Promise<AlbumEntity> => {
     if (albumData.artistId) {
-      const artist = await this.artistsService.getOne(albumData.artistId);
-      if (!artist) {
-        albumData.artistId = null;
-      }
+      albumData.artistId = await this.checkArtistExists(albumData.artistId);
     }
-    const newAlbum: AlbumEntity = {
-      artist: null,
-      ...albumData,
-      id: uuid(),
-    };
-    this.logger.log(`Creating album ${newAlbum.id}`);
-    const createdAlbum = this.albumsRepository.create(newAlbum);
-    return await this.albumsRepository.save(createdAlbum);
+    const album = this.albumsService.create(albumData);
+    this.logger.log(`Creating the album`);
+    return await this.albumsService.save(album);
   };
 
   update = async (id: string, albumData: UpdateAlbumDto) => {
-    const album = await this.albumsRepository.findOneBy({ id });
+    if (albumData.artistId) {
+      albumData.artistId = await this.checkArtistExists(albumData.artistId);
+    }
+    const album = await this.albumsService.findOneBy({ id });
     if (album) {
-      const updatedAlbum = {
-        ...album,
-        ...albumData,
-        id: id,
-      };
-
       this.logger.log(`Updating album ${id}`);
-      await this.albumsRepository.update({ id }, updatedAlbum);
-      const result = await this.albumsRepository.findOneBy({ id });
-      this.logger.log(
-        `result of updating artist is ${id} ${result.id}, ${result.name}, ${result.year}, ${result.artist}, ${result.artistId}`,
-      );
+      await this.albumsService.update({ id }, albumData);
+      return await this.albumsService.findOneBy({ id });
     } else {
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
   };
 
-  delete = async (id: string): Promise<boolean> => {
+  delete = async (id: string) => {
     this.logger.log(`Deleting album ${id}`);
-    // await this.tracksService.removeAlbumId(id);
-    // await this.favoritesService.removeAlbum(id);
-    const result = await this.albumsRepository.delete({ id });
+    const result = await this.albumsService.delete({ id });
     if (result) {
       return true;
     } else return false;

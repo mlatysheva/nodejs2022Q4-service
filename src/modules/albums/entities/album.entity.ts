@@ -29,15 +29,11 @@ export class AlbumEntity implements IAlbum {
     onDelete: 'SET NULL',
     nullable: true,
   })
-  @Exclude()
-  artist: ArtistEntity;
-
-  // @OneToMany(() => TrackEntity, (track) => track.album, { cascade: true, {
-  //   onDelete: 'SET NULL',
-  //   nullable: true,
-  // } })
-  // @Exclude()
-  // tracks: TrackEntity[];
+  @JoinColumn({
+    name: 'artistId',
+    referencedColumnName: 'id',
+  })
+  artist: string | null;
 
   constructor(partial: Partial<AlbumEntity>) {
     Object.assign(this, partial);
