@@ -1,66 +1,86 @@
-import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
-import { v4 as uuid } from 'uuid';
-import { TrackModel } from './entities/track.entity';
-import { InMemoryDBService } from '../../database/inMemoryDB.service';
-import { FavoritesService } from '../favorites/favorites.service';
+import { TrackEntity } from './entities/track.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
+import { ArtistsService } from '../artists/artists.service';
+import { AlbumsService } from '../albums/albums.service';
+import { ErrorMessage } from '../../constants/errors';
 
 @Injectable()
 export class TracksService {
-  private static tracks: InMemoryDBService<TrackModel> =
-    new InMemoryDBService<TrackModel>();
+  constructor(
+    @InjectRepository(TrackEntity)
+    private tracksService: Repository<TrackEntity>,
+    private artistsService: ArtistsService,
+    private albumsService: AlbumsService,
+  ) {}
+
   private logger = new Logger(TracksService.name);
 
-  // eslint-disable-next-line @typescript-eslint/no-empty-function
-  constructor() {} // private favoritesService: FavoritesService, // @Inject(forwardRef(() => FavoritesService))
+  checkArtistExists = async (artistId: string) => {
+    const artist = await this.artistsService.getOne(artistId);
+    if (!artist) {
+      return null;
+    } else {
+      return artistId;
+    }
+  };
+
+  checkAlbumExists = async (albumId: string) => {
+    const album = await this.albumsService.getOne(albumId);
+    if (!album) {
+      return null;
+    } else {
+      return albumId;
+    }
+  };
 
   getAll = async () => {
     this.logger.log('Getting all tracks');
-    return await TracksService.tracks.getAll();
+    return await this.tracksService.find();
   };
 
   getOne = async (id: string) => {
     this.logger.log(`Getting track ${id}`);
-    return await TracksService.tracks.getOne(id);
+    return await this.tracksService.findOneBy({ id });
   };
 
   create = async (trackData: CreateTrackDto) => {
-    const newTrack = new TrackModel({
-      ...trackData,
-      id: uuid(),
-    });
-    this.logger.log(`Creating track ${newTrack.id}`);
-    return await TracksService.tracks.post(newTrack);
+    if (trackData.albumId) {
+      trackData.albumId = await this.checkAlbumExists(trackData.albumId);
+    }
+    if (trackData.artistId) {
+      trackData.artistId = await this.checkArtistExists(trackData.artistId);
+    }
+    const track = this.tracksService.create(trackData);
+    this.logger.log(`Creating the track`);
+    return await this.tracksService.save(track);
   };
 
   update = async (id: string, trackData: UpdateTrackDto) => {
-    const track = await TracksService.tracks.getOne(id);
-    if (!track) {
-      return null;
+    if (trackData.albumId) {
+      trackData.albumId = await this.checkAlbumExists(trackData.albumId);
     }
-
-    const updatedTrack = new TrackModel({
-      ...track,
-      ...trackData,
-    });
-
-    this.logger.log(`Updating track ${id}`);
-
-    return await TracksService.tracks.update(id, updatedTrack);
+    if (trackData.artistId) {
+      trackData.artistId = await this.checkArtistExists(trackData.artistId);
+    }
+    const track = await this.tracksService.findOneBy({ id });
+    if (track) {
+      this.logger.log(`Updating track ${id}`);
+      await this.tracksService.update({ id }, trackData);
+      return await this.tracksService.findOneBy({ id });
+    } else {
+      throw new NotFoundException(ErrorMessage.NOT_FOUND);
+    }
   };
 
   delete = async (id: string) => {
     this.logger.log(`Deleting track ${id}`);
-    // await this.favoritesService.removeTrack(id);
-    return await TracksService.tracks.delete(id);
-  };
-
-  removeArtistId = async (id: string) => {
-    await TracksService.tracks.setIdToNull(id, 'artistId');
-  };
-
-  removeAlbumId = async (id: string) => {
-    await TracksService.tracks.setIdToNull(id, 'albumId');
+    const result = await this.tracksService.delete({ id });
+    if (result) {
+      return true;
+    } else return false;
   };
 }

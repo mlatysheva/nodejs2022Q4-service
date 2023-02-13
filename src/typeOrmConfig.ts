@@ -11,7 +11,7 @@ export const options = {
   username: process.env.POSTGRES_USER as string,
   database: process.env.POSTGRES_DB as string,
   password: process.env.POSTGRES_PASSWORD as string,
-  migrationsRun: false,
+  migrationsRun: true,
   synchronize: true,
   logging: true,
 };

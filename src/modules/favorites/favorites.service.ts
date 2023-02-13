@@ -7,7 +7,7 @@ import { TracksService } from '../tracks/tracks.service';
 import { IFavoritesResponse } from '../../types/types';
 import { AlbumEntity } from '../albums/entities/album.entity';
 import { ArtistEntity } from '../artists/entities/artist.entity';
-import { TrackModel } from '../tracks/entities/track.entity';
+import { TrackEntity } from '../tracks/entities/track.entity';
 
 @Injectable()
 export class FavoritesService {

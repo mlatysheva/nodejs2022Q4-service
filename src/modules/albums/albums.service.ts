@@ -65,8 +65,4 @@ export class AlbumsService {
       return true;
     } else return false;
   };
-
-  removeArtistId = async (id: string): Promise<void> => {
-    // await AlbumsService.albums.setIdToNull(id, 'artistId');
-  };
 }

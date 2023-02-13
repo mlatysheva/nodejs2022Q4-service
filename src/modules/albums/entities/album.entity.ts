@@ -2,14 +2,11 @@ import {
   Column,
   Entity,
   JoinColumn,
-  ManyToMany,
   ManyToOne,
-  OneToMany,
   PrimaryGeneratedColumn,
 } from 'typeorm';
 import { IAlbum } from '../../../types/types';
 import { ArtistEntity } from '../../artists/entities/artist.entity';
-import { Exclude } from 'class-transformer';
 
 @Entity('album')
 export class AlbumEntity implements IAlbum {
