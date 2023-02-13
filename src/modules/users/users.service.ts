@@ -15,13 +15,13 @@ import { Repository } from 'typeorm';
 export class UsersService {
   constructor(
     @InjectRepository(UserEntity)
-    private userRepository: Repository<UserEntity>,
+    private usersService: Repository<UserEntity>,
   ) {}
 
   private logger = new Logger(UsersService.name);
 
   findByLogin = async (login: string) => {
-    return await this.userRepository.findOneBy({ login });
+    return await this.usersService.findOneBy({ login });
   };
 
   doesLoginExist = async (login: string) => {
@@ -32,13 +32,13 @@ export class UsersService {
   };
 
   getAll = async () => {
-    const users = await this.userRepository.find();
+    const users = await this.usersService.find();
     this.logger.log('Getting all users');
     return users.map((user) => user.toResponse());
   };
 
   getOne = async (id: string) => {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.usersService.findOneBy({ id });
     if (user) {
       this.logger.log(`Getting user ${id}`);
       return user.toResponse();
@@ -51,14 +51,14 @@ export class UsersService {
       ...userData,
       version: 1,
     };
-    const createdUser = this.userRepository.create(userDTO);
+    const createdUser = this.usersService.create(userDTO);
 
     this.logger.log(`Creating user`);
-    return (await this.userRepository.save(createdUser)).toResponse();
+    return (await this.usersService.save(createdUser)).toResponse();
   };
 
   update = async (id: string, userData: UpdateUserDto) => {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.usersService.findOneBy({ id });
     if (!user) {
       return null;
     }
@@ -74,20 +74,20 @@ export class UsersService {
       this.logger.log(`Updating user ${id}`);
       user.password = userData.newPassword;
       user.version += 1;
-      return (await this.userRepository.save(user)).toResponse();
+      return (await this.usersService.save(user)).toResponse();
     } else {
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
   };
 
   delete = async (id: string) => {
-    const user = await this.userRepository.findOneBy({ id });
+    const user = await this.usersService.findOneBy({ id });
 
     if (!user) {
       return null;
     }
     this.logger.log(`Deleting user ${id}`);
 
-    return await this.userRepository.delete({ id });
+    return await this.usersService.delete({ id });
   };
 }

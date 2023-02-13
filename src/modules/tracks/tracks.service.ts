@@ -12,10 +12,8 @@ export class TracksService {
     new InMemoryDBService<TrackModel>();
   private logger = new Logger(TracksService.name);
 
-  constructor(
-    @Inject(forwardRef(() => FavoritesService))
-    private favoritesService: FavoritesService,
-  ) {}
+  // eslint-disable-next-line @typescript-eslint/no-empty-function
+  constructor() {} // private favoritesService: FavoritesService, // @Inject(forwardRef(() => FavoritesService))
 
   getAll = async () => {
     this.logger.log('Getting all tracks');
@@ -54,7 +52,7 @@ export class TracksService {
 
   delete = async (id: string) => {
     this.logger.log(`Deleting track ${id}`);
-    await this.favoritesService.removeTrack(id);
+    // await this.favoritesService.removeTrack(id);
     return await TracksService.tracks.delete(id);
   };
 

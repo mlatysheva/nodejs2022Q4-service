@@ -36,12 +36,11 @@ export class FavoritesController {
     )
     id: string,
   ) {
-    const album = await this.favoritesService.addAlbum(id);
-
-    if (!album) {
-      throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
-    }
-    return album;
+    // const album = await this.favoritesService.addAlbum(id);
+    // if (!album) {
+    //   throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
+    // }
+    // return album;
   }
 
   @Delete('album/:id')
@@ -79,10 +78,10 @@ export class FavoritesController {
   ) {
     const artist = await this.favoritesService.addArtist(id);
 
-    if (!artist) {
-      throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
-    }
-    return artist;
+    // if (!artist) {
+    //   throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
+    // }
+    // return artist;
   }
 
   @Delete('artist/:id')
@@ -120,10 +119,10 @@ export class FavoritesController {
   ) {
     const track = await this.favoritesService.addTrack(id);
 
-    if (!track) {
-      throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
-    }
-    return track;
+    // if (!track) {
+    //   throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
+    // }
+    // return track;
   }
 
   @Delete('track/:id')

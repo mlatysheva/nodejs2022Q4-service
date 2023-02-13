@@ -1,71 +1,56 @@
-import { Inject, Injectable, Logger, forwardRef } from '@nestjs/common';
+import { Injectable, Logger } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
-import { v4 as uuid } from 'uuid';
-import { ArtistModel } from './entities/artist.entity';
-import { InMemoryDBService } from '../../database/inMemoryDB.service';
-import { AlbumsService } from '../albums/albums.service';
-import { TracksService } from '../tracks/tracks.service';
-import { FavoritesService } from '../favorites/favorites.service';
+import { ArtistEntity } from './entities/artist.entity';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class ArtistsService {
-  private static artists: InMemoryDBService<ArtistModel> =
-    new InMemoryDBService<ArtistModel>();
-
   constructor(
-    @Inject(forwardRef(() => AlbumsService))
-    private albumsService: AlbumsService,
-    @Inject(forwardRef(() => TracksService))
-    private tracksService: TracksService,
-    @Inject(forwardRef(() => FavoritesService))
-    private favoritesService: FavoritesService,
+    @InjectRepository(ArtistEntity)
+    private artistsService: Repository<ArtistEntity>,
   ) {}
 
   private logger = new Logger(ArtistsService.name);
 
-  getAll = async (): Promise<Array<ArtistModel>> => {
+  getAll = async (): Promise<Array<ArtistEntity>> => {
     this.logger.log('Getting all artists');
-    return await ArtistsService.artists.getAll();
+    return await this.artistsService.find();
   };
 
-  getOne = async (id: string): Promise<ArtistModel> => {
+  getOne = async (id: string): Promise<ArtistEntity> => {
     this.logger.log(`Getting artist ${id}`);
-    return await ArtistsService.artists.getOne(id);
+    return await this.artistsService.findOneBy({ id });
   };
 
-  create = async (artistData: CreateArtistDto): Promise<ArtistModel> => {
-    const newArtist: ArtistModel = {
-      ...artistData,
-      id: uuid(),
-    };
-
-    this.logger.log(`Creating artist ${newArtist.id}`);
-    return await ArtistsService.artists.post(newArtist);
+  create = async (artistData: CreateArtistDto): Promise<ArtistEntity> => {
+    const artist = await this.artistsService.create(artistData);
+    this.logger.log(`Creating the artist`);
+    return await this.artistsService.save(artist);
   };
 
   update = async (
     id: string,
     artistData: UpdateArtistDto,
-  ): Promise<ArtistModel> => {
-    const artist = await ArtistsService.artists.getOne(id);
+  ): Promise<ArtistEntity> => {
+    const artist = await this.artistsService.findOneBy({ id });
     if (!artist) {
       return null;
     }
 
-    const updatedArtist = {
-      ...artist,
-      ...artistData,
-    };
+    await this.artistsService.update({ id }, artistData);
     this.logger.log(`Updating artist ${id}`);
-    return await ArtistsService.artists.update(id, updatedArtist);
+    return await this.artistsService.findOneBy({ id });
   };
 
   delete = async (id: string) => {
+    const artist = await this.artistsService.findOneBy({ id });
+    if (!artist) {
+      return null;
+    }
+
     this.logger.log(`Deleting artist ${id}`);
-    await this.tracksService.removeArtistId(id);
-    await this.albumsService.removeArtistId(id);
-    await this.favoritesService.removeArtist(id);
-    return await ArtistsService.artists.delete(id);
+    return await this.artistsService.delete({ id });
   };
 }

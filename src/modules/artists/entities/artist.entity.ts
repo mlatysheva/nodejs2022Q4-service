@@ -1,11 +1,18 @@
+import { Column, Entity, PrimaryGeneratedColumn } from 'typeorm';
 import { IArtist } from '../../../types/types';
 
-export class ArtistModel implements IArtist {
+@Entity('artist')
+export class ArtistEntity implements IArtist {
+  @PrimaryGeneratedColumn('uuid')
   id: string;
+
+  @Column()
   name: string;
+
+  @Column()
   grammy: boolean;
 
-  constructor(partial: Partial<ArtistModel>) {
+  constructor(partial: Partial<ArtistEntity>) {
     Object.assign(this, partial);
   }
 }
