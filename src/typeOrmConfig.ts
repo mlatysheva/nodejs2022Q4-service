@@ -11,20 +11,20 @@ export const options = {
   username: process.env.POSTGRES_USER as string,
   database: process.env.POSTGRES_DB as string,
   password: process.env.POSTGRES_PASSWORD as string,
-  migrationsRun: true,
-  synchronize: true,
+  migrationsRun: false,
+  synchronize: false,
   logging: true,
 };
 
 export const dataSourceConfig = {
   ...options,
   entities: ['dist/**/**/entities/*.entity.js'],
-  migrations: ['src/migration/*.{ts,js}'],
+  migrations: ['src/migrations/*.{ts,js}'],
 } as DataSourceOptions;
 
 export const typeOrmConfig = {
   ...options,
   entities: [__dirname + '/**/**/*.entity.{ts,js}'],
-  migrations: [__dirname + './migration/*.{ts,js}'],
+  migrations: [__dirname + './migrations/*.{ts,js}'],
   retryAttempts: 10,
 } as TypeOrmModuleOptions;

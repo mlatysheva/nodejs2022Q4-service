@@ -6,6 +6,7 @@ import { ArtistsService } from '../artists/artists.service';
 import { TracksService } from '../tracks/tracks.service';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import { TrackEntity } from '../tracks/entities/track.entity';
 
 @Injectable()
 export class FavoritesService {
@@ -19,17 +20,13 @@ export class FavoritesService {
 
   private logger = new Logger(FavoritesService.name);
 
-  doesExist = (id, array) => {
-    let exists = false;
-    array.forEach((item) => {
-      if (item.id == id) {
-        exists = true;
+  doesExist = async (id, array) => {
+    for (const item of array) {
+      if (item.id === id) {
         return true;
-      } else {
-        exists = false;
       }
-    });
-    return exists;
+    }
+    return false;
   };
 
   getAll = async () => {
@@ -135,7 +132,8 @@ export class FavoritesService {
     const favorites = await this.getAll();
     this.logger.log(`Removing track ${id} from favorites`);
 
-    const trackExists = this.doesExist(id, favorites.tracks);
+    const trackExists = await this.doesExist(id, favorites.tracks);
+
     this.logger.log(`trackExists for ${id} is ${trackExists}`);
 
     if (!trackExists) {
