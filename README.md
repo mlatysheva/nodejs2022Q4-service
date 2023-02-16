@@ -74,3 +74,4 @@ Once the application and database are running inside relevant Docker containers,
 - The following scripts may be used to run migrations:
   - `npm run migration:generate` - to generate migrations
   - `npm run migration:run` - to run migrations
+- Migrations are incoporated into the docker app when the app image is being built

@@ -27,7 +27,7 @@
     "test:cov": "jest --coverage",
     "test:debug": "node --inspect-brk -r tsconfig-paths/register -r ts-node/register node_modules/.bin/jest --runInBand",
     "typeorm": "typeorm-ts-node-esm",
-    "migration:create": "npm run build && npm run typeorm migration:create -- -d ./src/dataSource.ts ./src/migrations/migration",
+    "migration:create": "npm run build && npm run typeorm migration:create ./src/migrations/migration",
     "migration:generate": "npm run build && npm run typeorm migration:generate -- -d ./src/dataSource.ts ./src/migrations/migration",
     "migration:run": "npm run build && npm run typeorm migration:run -- -d ./src/dataSource.ts"
   },
