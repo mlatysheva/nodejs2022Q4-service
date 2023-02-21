@@ -22,6 +22,7 @@ export class TracksService {
   checkArtistExists = async (artistId: string) => {
     const artist = await this.artistsService.getOne(artistId);
     if (!artist) {
+      this.logger.warn(`Artist ${artistId} does not exist`);
       return null;
     } else {
       return artistId;
@@ -31,6 +32,7 @@ export class TracksService {
   checkAlbumExists = async (albumId: string) => {
     const album = await this.albumsService.getOne(albumId);
     if (!album) {
+      this.logger.warn(`Album ${albumId} does not exist`);
       return null;
     } else {
       return albumId;
@@ -72,6 +74,7 @@ export class TracksService {
       await this.tracksService.update({ id }, trackData);
       return await this.tracksService.findOneBy({ id });
     } else {
+      this.logger.warn(`Track ${id} does not exist`);
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
   };
@@ -81,6 +84,11 @@ export class TracksService {
     const result = await this.tracksService.delete({ id });
     if (result) {
       return true;
-    } else return false;
+    } else {
+      this.logger.warn(
+        `You are trying to delete Track ${id} that does not exist`,
+      );
+      return false;
+    }
   };
 }

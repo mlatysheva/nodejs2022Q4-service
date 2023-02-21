@@ -20,6 +20,7 @@ export class AlbumsService {
   checkArtistExists = async (artistId: string) => {
     const artist = await this.artistsService.getOne(artistId);
     if (!artist) {
+      this.logger.error(`Artist ${artistId} does not exist`);
       return null;
     } else {
       return artistId;
@@ -54,6 +55,7 @@ export class AlbumsService {
       await this.albumsService.update({ id }, albumData);
       return await this.albumsService.findOneBy({ id });
     } else {
+      this.logger.error(`Album ${id} was not found`);
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
   };
@@ -63,6 +65,9 @@ export class AlbumsService {
     const result = await this.albumsService.delete({ id });
     if (result) {
       return true;
-    } else return false;
+    } else {
+      this.logger.error(`Album ${id} was not found`);
+      return false;
+    }
   };
 }

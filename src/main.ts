@@ -6,12 +6,15 @@ import * as dotenv from 'dotenv';
 import { dirname, join, resolve } from 'path';
 import { cwd } from 'node:process';
 import { readFile } from 'fs/promises';
+import getLogLevels from './modules/logger/getLogLevels';
 
 dotenv.config({ path: resolve(cwd(), '.env') });
 
 async function bootstrap() {
   const port = process.env.PORT || 4000;
-  const app = await NestFactory.create(AppModule);
+  const app = await NestFactory.create(AppModule, {
+    logger: getLogLevels(true),
+  });
 
   const rootDirname = dirname(__dirname);
   const DOC_API = await readFile(join(rootDirname, 'doc', 'api.yaml'), 'utf-8');

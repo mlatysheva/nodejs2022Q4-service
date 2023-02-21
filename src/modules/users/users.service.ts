@@ -27,6 +27,7 @@ export class UsersService {
   doesLoginExist = async (login: string) => {
     const user = await this.findByLogin(login);
     if (user) {
+      this.logger.error(`This login ${login} already exists`);
       throw new BadRequestException(ErrorMessage.ALREADY_EXISTS);
     }
   };
@@ -43,6 +44,8 @@ export class UsersService {
       this.logger.log(`Getting user ${id}`);
       return user.toResponse();
     }
+    this.logger.warn(`User ${id} does not exist`);
+
     throw new NotFoundException(ErrorMessage.NOT_FOUND);
   };
 
@@ -60,6 +63,7 @@ export class UsersService {
   update = async (id: string, userData: UpdateUserDto) => {
     const user = await this.usersService.findOneBy({ id });
     if (!user) {
+      this.logger.warn(`User ${id} does not exist`);
       return null;
     }
 
@@ -67,6 +71,10 @@ export class UsersService {
       userData.oldPassword !== user.password ||
       userData.newPassword === userData.oldPassword
     ) {
+      this.logger.warn(
+        `Old password is incorrect or the new password is the same as the old password`,
+      );
+
       return ErrorMessage.PASSWORD_INCORRECT;
     }
 
@@ -76,6 +84,7 @@ export class UsersService {
       user.version += 1;
       return (await this.usersService.save(user)).toResponse();
     } else {
+      this.logger.warn(`User ${id} does not exist`);
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
   };
@@ -84,6 +93,7 @@ export class UsersService {
     const user = await this.usersService.findOneBy({ id });
 
     if (!user) {
+      this.logger.warn(`User ${id} does not exist`);
       return null;
     }
     this.logger.log(`Deleting user ${id}`);

@@ -36,6 +36,7 @@ export class ArtistsService {
   ): Promise<ArtistEntity> => {
     const artist = await this.artistsService.findOneBy({ id });
     if (!artist) {
+      this.logger.warn(`Artist ${id} does not exist`);
       return null;
     }
 
@@ -47,6 +48,7 @@ export class ArtistsService {
   delete = async (id: string) => {
     const artist = await this.artistsService.findOneBy({ id });
     if (!artist) {
+      this.logger.warn(`Artist ${id} does not exist`);
       return null;
     }
 

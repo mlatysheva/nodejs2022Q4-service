@@ -52,6 +52,7 @@ export class FavoritesService {
   addAlbum = async (id: string) => {
     const album = await this.albumsService.getOne(id);
     if (!album) {
+      this.logger.warn(`You are trying to add Album ${id} that does not exist`);
       return null;
     }
 
@@ -68,9 +69,12 @@ export class FavoritesService {
   removeAlbum = async (id: string) => {
     const favorites = await this.getAll();
     const albumExists = await this.doesExist(id, favorites.albums);
-    this.logger.log(`albumExists for ${id} is ${albumExists}`);
 
     if (!albumExists) {
+      this.logger.warn(
+        `You are trying to remove Album ${id} that has not been marked as a favorite`,
+      );
+
       return null;
     }
     favorites.albums = [...favorites.albums].filter((album) => album.id !== id);
@@ -82,6 +86,7 @@ export class FavoritesService {
   addArtist = async (id: string) => {
     const artist = await this.artistsService.getOne(id);
     if (!artist) {
+      this.logger.log(`You are trying to add artist ${id} that does not exist`);
       return null;
     }
 
@@ -98,9 +103,12 @@ export class FavoritesService {
   removeArtist = async (id: string) => {
     const favorites = await this.getAll();
     const artistExists = await this.doesExist(id, favorites.artists);
-    this.logger.log(`artistExists for ${id} is ${artistExists}`);
 
     if (!artistExists) {
+      this.logger.warn(
+        `You are trying to remove artist ${id} that has not been marked as a favorite`,
+      );
+
       return null;
     }
     favorites.artists = [...favorites.artists].filter(
@@ -114,6 +122,7 @@ export class FavoritesService {
   addTrack = async (id: string) => {
     const track = await this.tracksService.getOne(id);
     if (!track) {
+      this.logger.warn(`You are trying to add track ${id} that does not exist`);
       return null;
     }
 
@@ -133,9 +142,10 @@ export class FavoritesService {
 
     const trackExists = await this.doesExist(id, favorites.tracks);
 
-    this.logger.log(`trackExists for ${id} is ${trackExists}`);
-
     if (!trackExists) {
+      this.logger.warn(
+        `You are trying to remove track ${id} that has not been marked as a favorite`,
+      );
       return null;
     }
     favorites.tracks = [...favorites.tracks].filter((track) => track.id !== id);
