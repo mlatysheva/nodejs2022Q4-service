@@ -36,8 +36,11 @@ The database is a `postgres` database and `Typeorm` ORM tool is used to create r
   - `npm run docker:scan:db` to scan the database for vulnerabilities
   - `npm run docker:scan` to scan both the database and the app for vulnerabilities
 
-- Once the app is running in the docker container, run the tests inside the docker by running:
-`npm run docker:test`
+- Once the app is running in the docker container, run migrations to populate the database:
+- first run `npm run migration:generate` to generate the migrations
+- then run `npm run migration:run` to run the migrations
+After the migrations have been applied to the database, run the tests by
+- `npm run test`
 
 - The application is running by default on port 4000
 - The postgres database is running by default on port 5432
