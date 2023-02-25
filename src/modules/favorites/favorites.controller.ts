@@ -37,7 +37,6 @@ export class FavoritesController {
     id: string,
   ) {
     const album = await this.favoritesService.addAlbum(id);
-
     if (!album) {
       throw new UnprocessableEntityException(ErrorMessage.NOT_FOUND);
     }

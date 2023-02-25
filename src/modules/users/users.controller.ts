@@ -48,9 +48,7 @@ export class UsersController {
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
 
-    const userCopy = { ...user };
-    delete userCopy.password;
-    return userCopy;
+    return user;
   }
 
   @Post()
@@ -60,9 +58,7 @@ export class UsersController {
     userData: CreateUserDto,
   ) {
     const user = await this.usersService.create(userData);
-    const userCopy = { ...user };
-    delete userCopy.password;
-    return userCopy;
+    return user;
   }
 
   @Put(':id')
@@ -97,9 +93,7 @@ export class UsersController {
       throw new ForbiddenException(ErrorMessage.PASSWORD_INCORRECT);
     }
 
-    const copyUser = { ...updatedUser };
-    delete copyUser.password;
-    return copyUser;
+    return updatedUser;
   }
 
   @Delete(':id')

@@ -1,61 +1,93 @@
-import { Injectable, Logger } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
-import { UserModel } from './entities/user.entity';
-import { v4 as uuid } from 'uuid';
+import { UserEntity } from './entities/user.entity';
 import { ErrorMessage } from '../../constants/errors';
-import { InMemoryDBService } from '../../database/inMemoryDB.service';
+import { InjectRepository } from '@nestjs/typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class UsersService {
-  constructor(private readonly users: InMemoryDBService<UserModel>) {}
+  constructor(
+    @InjectRepository(UserEntity)
+    private usersService: Repository<UserEntity>,
+  ) {}
+
   private logger = new Logger(UsersService.name);
 
-  getAll = async (): Promise<UserModel[]> => {
+  findByLogin = async (login: string) => {
+    return await this.usersService.findOneBy({ login });
+  };
+
+  doesLoginExist = async (login: string) => {
+    const user = await this.findByLogin(login);
+    if (user) {
+      throw new BadRequestException(ErrorMessage.ALREADY_EXISTS);
+    }
+  };
+
+  getAll = async () => {
+    const users = await this.usersService.find();
     this.logger.log('Getting all users');
-    return await this.users.getAll();
+    return users.map((user) => user.toResponse());
   };
 
-  getOne = async (id: string): Promise<UserModel> => {
-    this.logger.log(`Getting user ${id}`);
-    return await this.users.getOne(id);
+  getOne = async (id: string) => {
+    const user = await this.usersService.findOneBy({ id });
+    if (user) {
+      this.logger.log(`Getting user ${id}`);
+      return user.toResponse();
+    }
+    throw new NotFoundException(ErrorMessage.NOT_FOUND);
   };
 
-  create = async (userData: CreateUserDto): Promise<UserModel> => {
-    const timing = Date.now();
-    const newUser = new UserModel({
+  create = async (userData: CreateUserDto) => {
+    const userDTO = {
       ...userData,
-      id: uuid(),
       version: 1,
-      createdAt: timing,
-      updatedAt: timing,
-    });
+    };
+    const createdUser = this.usersService.create(userDTO);
 
-    this.logger.log(`Creating user ${newUser.id}`);
-    return await this.users.post(newUser);
+    this.logger.log(`Creating user`);
+    return (await this.usersService.save(createdUser)).toResponse();
   };
 
-  update = async (id: string, dataToUpdate: UpdateUserDto) => {
-    const user = await this.users.getOne(id);
+  update = async (id: string, userData: UpdateUserDto) => {
+    const user = await this.usersService.findOneBy({ id });
     if (!user) {
       return null;
     }
 
-    if (dataToUpdate.oldPassword !== user.password) {
+    if (
+      userData.oldPassword !== user.password ||
+      userData.newPassword === userData.oldPassword
+    ) {
       return ErrorMessage.PASSWORD_INCORRECT;
     }
-    const updatedUser = new UserModel({
-      ...user,
-      password: dataToUpdate.newPassword,
-      version: user.version + 1,
-      updatedAt: Date.now(),
-    });
-    this.logger.log(`Updating user ${id}`);
-    return await this.users.update(id, updatedUser);
+
+    if (user) {
+      this.logger.log(`Updating user ${id}`);
+      user.password = userData.newPassword;
+      user.version += 1;
+      return (await this.usersService.save(user)).toResponse();
+    } else {
+      throw new NotFoundException(ErrorMessage.NOT_FOUND);
+    }
   };
 
   delete = async (id: string) => {
+    const user = await this.usersService.findOneBy({ id });
+
+    if (!user) {
+      return null;
+    }
     this.logger.log(`Deleting user ${id}`);
-    return await this.users.delete(id);
+
+    return await this.usersService.delete({ id });
   };
 }
