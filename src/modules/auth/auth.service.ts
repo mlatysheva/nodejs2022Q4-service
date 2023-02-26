@@ -22,43 +22,9 @@ export class AuthService {
     private usersService: UsersService,
   ) {}
 
-  async validateUser(login: string, pass: string) {
-    const user = await this.usersService.findByLogin(login);
-    // const passwordValid = await bcrypt.compare(pass, user.hash);
-    // if (user && passwordValid) {
-    //   return user;
-    // }
-    return null;
-  }
-
-  async signup(dto: CreateUserDto) {
-    if (!dto.login || !dto.password) {
-      throw new BadRequestException('Login or password is empty');
-    }
-    const user = await this.usersService.create(dto);
-    return user;
-  }
-
-  async login(loginUserDto: LoginDto) {
-    if (!loginUserDto.login || !loginUserDto.password) {
-      throw new BadRequestException('Login or password is empty');
-    }
-    const user = await this.usersService.findByLogin(loginUserDto.login);
-    console.log('in login user is:');
-    console.dir(user);
-    if (!user) {
-      throw new NotFoundException('User not found');
-    }
-    // const passwordValid = await bcrypt.compare(
-    //   loginUserDto.password,
-    //   user.hash,
-    // );
-    // if (!passwordValid) {
-    //   throw new ForbiddenException('Incorrect password');
-    // }
-    const tokens = await this.createTokens(user.id, user.login);
-    return tokens;
-  }
+  // async updateRefreshToken(id: string, newRefreshToken: string) {
+  //   await this.usersService.updateRefreshToken(id, newRefreshToken);
+  // }
 
   async createTokens(userId: string, login: string) {
     const payload = { sub: userId, login: login };
@@ -71,5 +37,23 @@ export class AuthService {
       secret: process.env.JWT_SECRET_REFRESH_KEY,
     });
     return { accessToken, refreshToken };
+  }
+
+  async signup(dto: CreateUserDto) {
+    return await this.usersService.create(dto);
+  }
+
+  async login(dto: LoginDto) {
+    const user = await this.usersService.findByLogin(dto.login);
+    if (!user) {
+      return null;
+    }
+    const passwordValid = await bcrypt.compare(dto.password, user.password);
+    if (!passwordValid) {
+      return null;
+    }
+    const tokens = await this.createTokens(user.id, user.login);
+    // await this.updateRefreshToken(user.id, tokens.refreshToken);
+    return tokens;
   }
 }

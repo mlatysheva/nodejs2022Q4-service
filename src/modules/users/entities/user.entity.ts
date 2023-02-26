@@ -19,6 +19,10 @@ export class UserEntity {
   @Exclude()
   password: string;
 
+  // @Column()
+  // @Exclude()
+  // refreshToken: string;
+
   @Column()
   version: number;
 

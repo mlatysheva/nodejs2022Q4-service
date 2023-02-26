@@ -28,6 +28,15 @@ export class UsersService {
     }
   };
 
+  // async updateRefreshToken(id: string, newRefreshToken: string) {
+  //   await this.usersService
+  //     .createQueryBuilder()
+  //     .update(UserEntity)
+  //     .set({ refreshToken: newRefreshToken })
+  //     .where('id = :id', { id })
+  //     .execute();
+  // }
+
   getAll = async () => {
     const users = await this.usersService.find();
     return users.map((user) => user.toResponse());

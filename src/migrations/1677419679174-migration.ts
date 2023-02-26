@@ -1,15 +1,15 @@
 import { MigrationInterface, QueryRunner } from "typeorm";
 
-export class migration1677329274187 implements MigrationInterface {
-    name = 'migration1677329274187'
+export class migration1677419679174 implements MigrationInterface {
+    name = 'migration1677419679174'
 
     public async up(queryRunner: QueryRunner): Promise<void> {
         await queryRunner.query(`CREATE TABLE "artist" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "grammy" boolean NOT NULL, CONSTRAINT "PK_55b76e71568b5db4d01d3e394ed" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "album" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "year" integer NOT NULL, "artistId" uuid, CONSTRAINT "PK_58e0b4b8a31bb897e6959fe3206" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "track" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "name" character varying NOT NULL, "duration" integer NOT NULL, "artistId" uuid, "albumId" uuid, CONSTRAINT "PK_0631b9bcf521f8fab3a15f2c37e" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "favorites_entity" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), CONSTRAINT "PK_e42953e6be13870839a04a3fa88" PRIMARY KEY ("id"))`);
-        await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "login" character varying NOT NULL, "password" character varying NOT NULL, "version" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "log" ("id" SERIAL NOT NULL, "context" character varying NOT NULL, "message" character varying NOT NULL, "level" character varying NOT NULL, "creationDate" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_350604cbdf991d5930d9e618fbd" PRIMARY KEY ("id"))`);
+        await queryRunner.query(`CREATE TABLE "user" ("id" uuid NOT NULL DEFAULT uuid_generate_v4(), "login" character varying NOT NULL, "password" character varying NOT NULL, "version" integer NOT NULL, "createdAt" TIMESTAMP NOT NULL DEFAULT now(), "updatedAt" TIMESTAMP NOT NULL DEFAULT now(), CONSTRAINT "PK_cace4a159ff9f2512dd42373760" PRIMARY KEY ("id"))`);
         await queryRunner.query(`CREATE TABLE "favorites_entity_artists_artist" ("favoritesEntityId" uuid NOT NULL, "artistId" uuid NOT NULL, CONSTRAINT "PK_760480c098db73010ea9a572fec" PRIMARY KEY ("favoritesEntityId", "artistId"))`);
         await queryRunner.query(`CREATE INDEX "IDX_5d2ac54b1732036ccb6a09432b" ON "favorites_entity_artists_artist" ("favoritesEntityId") `);
         await queryRunner.query(`CREATE INDEX "IDX_45422be11e6f79a104a008c3ee" ON "favorites_entity_artists_artist" ("artistId") `);
@@ -49,8 +49,8 @@ export class migration1677329274187 implements MigrationInterface {
         await queryRunner.query(`DROP INDEX "public"."IDX_45422be11e6f79a104a008c3ee"`);
         await queryRunner.query(`DROP INDEX "public"."IDX_5d2ac54b1732036ccb6a09432b"`);
         await queryRunner.query(`DROP TABLE "favorites_entity_artists_artist"`);
-        await queryRunner.query(`DROP TABLE "log"`);
         await queryRunner.query(`DROP TABLE "user"`);
+        await queryRunner.query(`DROP TABLE "log"`);
         await queryRunner.query(`DROP TABLE "favorites_entity"`);
         await queryRunner.query(`DROP TABLE "track"`);
         await queryRunner.query(`DROP TABLE "album"`);

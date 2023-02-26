@@ -1,20 +1,49 @@
-import { Body, Controller, Post, HttpCode, HttpStatus } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Post,
+  HttpCode,
+  HttpStatus,
+  ForbiddenException,
+} from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
+import { createParamDecorator, ExecutionContext } from '@nestjs/common';
+import { Public } from './decorators/public.decorator';
+import { CreateUserDto } from '../users/dto/createUser.dto';
+import { ErrorMessage } from '../../constants/errors';
+
+export const GetCurrentUser = createParamDecorator(
+  (data: string | undefined, context: ExecutionContext) => {
+    const request = context.switchToHttp().getRequest();
+
+    if (!data) {
+      return request.user;
+    }
+
+    return request.user[data];
+  },
+);
 
 @Controller('auth')
 export class AuthController {
   constructor(private authService: AuthService) {}
 
+  @Public()
   @Post('signup')
   @HttpCode(HttpStatus.CREATED)
-  async signup(@Body() dto: LoginDto) {
+  async signup(@Body() dto: CreateUserDto) {
     return await this.authService.signup(dto);
   }
 
+  @Public()
   @Post('login')
   @HttpCode(HttpStatus.OK)
   async login(@Body() dto: LoginDto) {
-    return await this.authService.login(dto);
+    const accessToken = (await this.authService.login(dto)).accessToken;
+    if (!accessToken) {
+      throw new ForbiddenException(ErrorMessage.NOT_FOUND);
+    }
+    return accessToken;
   }
 }
