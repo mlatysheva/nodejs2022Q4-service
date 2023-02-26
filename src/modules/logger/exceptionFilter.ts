@@ -25,12 +25,8 @@ export class HttpExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()['message']
         : 'Internal server error';
 
-    const errorLog =
-      `${method} ` +
-      `${originalUrl} ` +
-      `${statusCode} ` +
-      `error: ${JSON.stringify({ statusCode, message })}`;
-
-    response.status(statusCode).json({ statusCode, message });
+    response
+      .status(statusCode)
+      .json({ method, originalUrl, statusCode, message });
   }
 }

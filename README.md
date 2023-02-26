@@ -10,6 +10,8 @@ This is a Nestjs RESTful music library application that can do the following:
 In the second part I added `Docker` to deploy the app and the database that will be used to store the information.
 The database is a `postgres` database and `Typeorm` ORM tool is used to create relations and manipulate the data in the database from the app.
 
+In the third part I added a Custom Logger, a Database Logger and an Exception Filter to log messages and errors.
+
 ## The stack used
 - Docker
 - Postgresql
@@ -54,11 +56,9 @@ After the migrations have been applied to the database, run the tests by
 
 ## Testing
 
-### Running the tests inside the docker
+Once the application and database are running inside relevant Docker containers, run the tests by:
 
-Once the application and database are running inside relevant Docker containers, open the terminal and enter:
-
-- `npm run docker:test` to run the e2e tests inside the docker
+- `npm run test`
 
 ![Results of the tests inside Docker](screenshots/screenshot_docker_tests.png)
 
