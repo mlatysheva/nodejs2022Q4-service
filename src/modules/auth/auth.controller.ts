@@ -13,17 +13,17 @@ import { Public } from './decorators/public.decorator';
 import { CreateUserDto } from '../users/dto/createUser.dto';
 import { ErrorMessage } from '../../constants/errors';
 
-export const GetCurrentUser = createParamDecorator(
-  (data: string | undefined, context: ExecutionContext) => {
-    const request = context.switchToHttp().getRequest();
+// export const GetCurrentUser = createParamDecorator(
+//   (data: string | undefined, context: ExecutionContext) => {
+//     const request = context.switchToHttp().getRequest();
 
-    if (!data) {
-      return request.user;
-    }
+//     if (!data) {
+//       return request.user;
+//     }
 
-    return request.user[data];
-  },
-);
+//     return request.user[data];
+//   },
+// );
 
 @Controller('auth')
 export class AuthController {

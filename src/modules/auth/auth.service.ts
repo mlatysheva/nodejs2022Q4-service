@@ -10,11 +10,6 @@ import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/createUser.dto';
 
-export interface JwtPayload {
-  userId: string;
-  login: string;
-}
-
 @Injectable()
 export class AuthService {
   constructor(

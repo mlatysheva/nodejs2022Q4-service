@@ -9,6 +9,9 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './typeOrmConfig';
 import { LogsMiddleware } from './modules/logger/logs.middleware';
 import { LoggerModule } from './modules/logger/logger.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { APP_GUARD } from '@nestjs/core';
+import { JwtGuard } from './modules/auth/guard/jwt.guard';
 
 @Module({
   imports: [
@@ -23,9 +26,15 @@ import { LoggerModule } from './modules/logger/logger.module';
     TracksModule,
     FavoritesModule,
     LoggerModule,
+    AuthModule,
   ],
   controllers: [],
-  providers: [],
+  providers: [
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtGuard,
+    // },
+  ],
 })
 export class AppModule {
   configure(consumer: MiddlewareConsumer) {

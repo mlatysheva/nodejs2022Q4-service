@@ -1,10 +1,11 @@
-import { Exclude } from 'class-transformer';
+import { Exclude, Transform } from 'class-transformer';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  VersionColumn,
 } from 'typeorm';
 
 @Entity('user')
@@ -23,29 +24,16 @@ export class UserEntity {
   // @Exclude()
   // refreshToken: string;
 
-  @Column()
+  @VersionColumn()
   version: number;
 
-  @CreateDateColumn({
-    transformer: {
-      from: (value: Date) => value.getTime(),
-      to: (value: Date) => value,
-    },
-  })
+  @CreateDateColumn()
+  @Transform(({ value }) => value.getTime())
   createdAt: number;
 
-  @UpdateDateColumn({
-    transformer: {
-      from: (value: Date) => value.getTime(),
-      to: (value: Date) => value,
-    },
-  })
+  @UpdateDateColumn()
+  @Transform(({ value }) => value.getTime())
   updatedAt: number;
-
-  toResponse() {
-    const { id, login, version, createdAt, updatedAt } = this;
-    return { id, login, version, createdAt, updatedAt };
-  }
 
   constructor(partial: Partial<UserEntity>) {
     Object.assign(this, partial);

@@ -1,4 +1,4 @@
-import { NestFactory } from '@nestjs/core';
+import { NestFactory, Reflector } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { parse } from 'yaml';
 import { AppModule } from './app.module';
@@ -8,7 +8,11 @@ import { readFile } from 'fs/promises';
 // import getLogLevels from './modules/logger/getLogLevels';
 import getLogLevels from './modules/logger/getLogLevels';
 import { HttpExceptionFilter } from './modules/logger/exceptionFilter';
-import { Logger, ValidationPipe } from '@nestjs/common';
+import {
+  ClassSerializerInterceptor,
+  Logger,
+  ValidationPipe,
+} from '@nestjs/common';
 import { CustomLogger } from './modules/logger/customLogger';
 
 async function bootstrap() {
@@ -19,12 +23,15 @@ async function bootstrap() {
     logger: getLogLevels(true),
     bufferLogs: true,
   });
-  app.useLogger(app.get(CustomLogger));
-  app.useGlobalFilters(new HttpExceptionFilter());
-  app.useGlobalPipes(new ValidationPipe());
-  app.useGlobalPipes(
-    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
-  );
+  app
+    .useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
+    .useLogger(app.get(CustomLogger));
+  app
+    .useGlobalFilters(new HttpExceptionFilter())
+    .useGlobalPipes(new ValidationPipe())
+    .useGlobalPipes(
+      new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+    );
 
   const rootDirname = dirname(__dirname);
   const DOC_API = await readFile(join(rootDirname, 'doc', 'api.yaml'), 'utf-8');

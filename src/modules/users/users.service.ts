@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
@@ -9,13 +10,21 @@ import { UserEntity } from './entities/user.entity';
 import { ErrorMessage } from '../../constants/errors';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
+import 'dotenv/config';
+import { compare, hash } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
+  private logger = new Logger();
+
   constructor(
     @InjectRepository(UserEntity)
     private usersService: Repository<UserEntity>,
   ) {}
+
+  addHashPassword = async (password: string) => {
+    return hash(password, Number(process.env.CRYPT_SALT));
+  };
 
   findByLogin = async (login: string) => {
     return await this.usersService.findOneBy({ login });
@@ -38,27 +47,21 @@ export class UsersService {
   // }
 
   getAll = async () => {
-    const users = await this.usersService.find();
-    return users.map((user) => user.toResponse());
+    return await this.usersService.find();
   };
 
   getOne = async (id: string) => {
-    const user = await this.usersService.findOneBy({ id });
-    if (user) {
-      return user.toResponse();
-    }
-
-    throw new NotFoundException(ErrorMessage.NOT_FOUND);
+    return await this.usersService.findOneBy({ id });
   };
 
-  create = async (userData: CreateUserDto) => {
-    const userDTO = {
-      ...userData,
-      version: 1,
-    };
-    const createdUser = this.usersService.create(userDTO);
+  create = async (createUserDto: CreateUserDto): Promise<UserEntity> => {
+    const hashedPassword = await this.addHashPassword(createUserDto.password);
+    const user = await this.usersService.create({
+      login: createUserDto.login,
+      password: hashedPassword,
+    });
 
-    return (await this.usersService.save(createdUser)).toResponse();
+    return await this.usersService.save(user);
   };
 
   update = async (id: string, userData: UpdateUserDto) => {
@@ -67,17 +70,15 @@ export class UsersService {
       return null;
     }
 
-    if (
-      userData.oldPassword !== user.password ||
-      userData.newPassword === userData.oldPassword
-    ) {
+    const passwordValid = await compare(userData.oldPassword, user.password);
+
+    if (!passwordValid) {
       return ErrorMessage.PASSWORD_INCORRECT;
     }
 
     if (user) {
-      user.password = userData.newPassword;
-      user.version += 1;
-      return (await this.usersService.save(user)).toResponse();
+      user.password = await this.addHashPassword(userData.newPassword);
+      return await this.usersService.save(user);
     } else {
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
