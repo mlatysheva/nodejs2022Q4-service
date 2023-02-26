@@ -15,25 +15,25 @@ import { JwtGuard } from './modules/auth/guard/jwt.guard';
 
 @Module({
   imports: [
-    ConfigModule.forRoot({
-      isGlobal: true,
-      envFilePath: '../.env',
-    }),
-    TypeOrmModule.forRoot(typeOrmConfig),
+    AuthModule,
     UsersModule,
     ArtistsModule,
     AlbumsModule,
     TracksModule,
     FavoritesModule,
     LoggerModule,
-    AuthModule,
+    ConfigModule.forRoot({
+      isGlobal: true,
+      envFilePath: '../.env',
+    }),
+    TypeOrmModule.forRoot(typeOrmConfig),
   ],
   controllers: [],
   providers: [
-    // {
-    //   provide: APP_GUARD,
-    //   useClass: JwtGuard,
-    // },
+    {
+      provide: APP_GUARD,
+      useClass: JwtGuard,
+    },
   ],
 })
 export class AppModule {

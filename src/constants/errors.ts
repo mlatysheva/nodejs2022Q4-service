@@ -4,4 +4,5 @@ export enum ErrorMessage {
   'IVALID_BODY' = 'Required fields have not been provided',
   'NO_CONTENT' = 'The item has no content',
   'ALREADY_EXISTS' = 'The item already exists in favorites',
+  'NOT_AUTHORISED' = 'The user is not authorised',
 }

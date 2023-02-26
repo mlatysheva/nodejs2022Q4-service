@@ -5,6 +5,7 @@ import {
   HttpCode,
   HttpStatus,
   ForbiddenException,
+  UseInterceptors,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginDto } from './dto/login.dto';
@@ -37,13 +38,14 @@ export class AuthController {
   }
 
   @Public()
+  @UseInterceptors(ForbiddenException)
   @Post('login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() dto: LoginDto) {
-    const accessToken = (await this.authService.login(dto)).accessToken;
-    if (!accessToken) {
-      throw new ForbiddenException(ErrorMessage.NOT_FOUND);
-    }
-    return accessToken;
+  async login(@Body() dto: CreateUserDto) {
+    return await this.authService.login(dto);
+    // if (!tokens) {
+    //   throw new ForbiddenException(ErrorMessage.NOT_FOUND);
+    // }
+    // return tokens;
   }
 }
