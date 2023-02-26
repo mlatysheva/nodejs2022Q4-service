@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { CreateUserDto } from './dto/createUser.dto';
@@ -18,8 +17,6 @@ export class UsersService {
     private usersService: Repository<UserEntity>,
   ) {}
 
-  private logger = new Logger(UsersService.name);
-
   findByLogin = async (login: string) => {
     return await this.usersService.findOneBy({ login });
   };
@@ -27,24 +24,20 @@ export class UsersService {
   doesLoginExist = async (login: string) => {
     const user = await this.findByLogin(login);
     if (user) {
-      this.logger.error(`This login ${login} already exists`);
       throw new BadRequestException(ErrorMessage.ALREADY_EXISTS);
     }
   };
 
   getAll = async () => {
     const users = await this.usersService.find();
-    this.logger.log('Getting all users');
     return users.map((user) => user.toResponse());
   };
 
   getOne = async (id: string) => {
     const user = await this.usersService.findOneBy({ id });
     if (user) {
-      this.logger.log(`Getting user ${id}`);
       return user.toResponse();
     }
-    this.logger.warn(`User ${id} does not exist`);
 
     throw new NotFoundException(ErrorMessage.NOT_FOUND);
   };
@@ -56,14 +49,12 @@ export class UsersService {
     };
     const createdUser = this.usersService.create(userDTO);
 
-    this.logger.log(`Creating user`);
     return (await this.usersService.save(createdUser)).toResponse();
   };
 
   update = async (id: string, userData: UpdateUserDto) => {
     const user = await this.usersService.findOneBy({ id });
     if (!user) {
-      this.logger.warn(`User ${id} does not exist`);
       return null;
     }
 
@@ -71,20 +62,14 @@ export class UsersService {
       userData.oldPassword !== user.password ||
       userData.newPassword === userData.oldPassword
     ) {
-      this.logger.warn(
-        `Old password is incorrect or the new password is the same as the old password`,
-      );
-
       return ErrorMessage.PASSWORD_INCORRECT;
     }
 
     if (user) {
-      this.logger.log(`Updating user ${id}`);
       user.password = userData.newPassword;
       user.version += 1;
       return (await this.usersService.save(user)).toResponse();
     } else {
-      this.logger.warn(`User ${id} does not exist`);
       throw new NotFoundException(ErrorMessage.NOT_FOUND);
     }
   };
@@ -93,11 +78,8 @@ export class UsersService {
     const user = await this.usersService.findOneBy({ id });
 
     if (!user) {
-      this.logger.warn(`User ${id} does not exist`);
       return null;
     }
-    this.logger.log(`Deleting user ${id}`);
-
     return await this.usersService.delete({ id });
   };
 }

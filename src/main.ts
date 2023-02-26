@@ -2,23 +2,29 @@ import { NestFactory } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { parse } from 'yaml';
 import { AppModule } from './app.module';
-import * as dotenv from 'dotenv';
-import { dirname, join, resolve } from 'path';
-import { cwd } from 'node:process';
+import 'dotenv/config';
+import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';
 // import getLogLevels from './modules/logger/getLogLevels';
-import { CustomLogger } from './modules/logger/customLogger';
 import getLogLevels from './modules/logger/getLogLevels';
-
-dotenv.config({ path: resolve(cwd(), '.env') });
+import { HttpExceptionFilter } from './modules/logger/exceptionFilter';
+import { Logger, ValidationPipe } from '@nestjs/common';
+import { CustomLogger } from './modules/logger/customLogger';
 
 async function bootstrap() {
+  const logger = new Logger(bootstrap.name);
+
   const port = process.env.PORT || 4000;
   const app = await NestFactory.create(AppModule, {
     logger: getLogLevels(true),
     bufferLogs: true,
   });
-  // app.useLogger(app.get(CustomLogger));
+  app.useLogger(app.get(CustomLogger));
+  app.useGlobalFilters(new HttpExceptionFilter());
+  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(
+    new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
+  );
 
   const rootDirname = dirname(__dirname);
   const DOC_API = await readFile(join(rootDirname, 'doc', 'api.yaml'), 'utf-8');
@@ -26,5 +32,20 @@ async function bootstrap() {
   SwaggerModule.setup('doc', app, document);
 
   await app.listen(port);
+
+  process.on('unhandledRejection', (reason, promise) => {
+    logger.error(
+      `${new Date().toUTCString()} Unhandled Rejection at Promise reason: ${reason} promise: ${promise}`,
+    );
+  });
+
+  process.on('uncaughtException', (err) => {
+    logger.error(
+      `${new Date().toUTCString()} Uncaught Exception thrown ${
+        err.message
+      } stack: ${err.stack}`,
+    );
+    process.exit(1);
+  });
 }
 bootstrap();

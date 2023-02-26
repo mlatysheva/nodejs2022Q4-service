@@ -11,8 +11,9 @@ export class LogsMiddleware implements NestMiddleware {
 
     response.on('finish', () => {
       const { statusCode, statusMessage } = response;
-      const message = `${method}${EOL} ${url}${EOL} query:
-        ${JSON.stringify(query)}${EOL} body: ${JSON.stringify(
+      const message = `Method: ${method} URL: ${url}${EOL} query: ${JSON.stringify(
+        query,
+      )}${EOL} body: ${JSON.stringify(
         body,
       )}${EOL} status: ${statusCode}${EOL} message: ${statusMessage}${EOL}`;
 

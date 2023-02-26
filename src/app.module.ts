@@ -8,6 +8,7 @@ import { FavoritesModule } from './modules/favorites/favorites.module';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { typeOrmConfig } from './typeOrmConfig';
 import { LogsMiddleware } from './modules/logger/logs.middleware';
+import { LoggerModule } from './modules/logger/logger.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { LogsMiddleware } from './modules/logger/logs.middleware';
     AlbumsModule,
     TracksModule,
     FavoritesModule,
+    LoggerModule,
   ],
   controllers: [],
   providers: [],

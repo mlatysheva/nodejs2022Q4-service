@@ -1,18 +1,18 @@
 import { Injectable, ConsoleLogger } from '@nestjs/common';
 import { ConsoleLoggerOptions } from '@nestjs/common/services/console-logger.service';
 import { ConfigService } from '@nestjs/config';
-import { LoggerService } from './logger.service';
 import getLogLevels from './getLogLevels';
+import { LogsService } from './logs.service';
 
 @Injectable()
 export class CustomLogger extends ConsoleLogger {
-  private readonly loggerService: LoggerService;
+  private readonly logsService: LogsService;
 
   constructor(
     context: string,
     options: ConsoleLoggerOptions,
     configService: ConfigService,
-    loggerService: LoggerService,
+    logsService: LogsService,
   ) {
     const environment = configService.get('NODE_ENV');
 
@@ -21,52 +21,56 @@ export class CustomLogger extends ConsoleLogger {
       logLevels: getLogLevels(environment === 'production'),
     });
 
-    this.loggerService = loggerService;
+    this.logsService = logsService;
   }
 
-  log(message: string, context?: string) {
+  async log(message: string, context: string | '[NEST]') {
     super.log.apply(this, [message, context]);
 
-    this.loggerService.createLog({
+    await this.logsService.createLog({
       message,
       context,
       level: 'log',
     });
   }
-  error(message: string, stack?: string, context?: string) {
+
+  async error(message: string, stack?: string, context?: string | 'NEST') {
     super.error.apply(this, [message, stack, context]);
 
-    this.loggerService.createLog({
+    await this.logsService.createLog({
       message,
-      context,
+      context: 'NEST',
       level: 'error',
     });
   }
-  warn(message: string, context?: string) {
+
+  async warn(message: string, context?: string | '[NEST]') {
     super.warn.apply(this, [message, context]);
 
-    this.loggerService.createLog({
+    await this.logsService.createLog({
       message,
       context,
-      level: 'error',
+      level: 'warn',
     });
   }
-  debug(message: string, context?: string) {
+
+  async debug(message: string, context?: string | '[NEST]') {
     super.debug.apply(this, [message, context]);
 
-    this.loggerService.createLog({
+    await this.logsService.createLog({
       message,
       context,
-      level: 'error',
+      level: 'debug',
     });
   }
-  verbose(message: string, context?: string) {
+
+  async verbose(message: string, context?: string | '[NEST]') {
     super.debug.apply(this, [message, context]);
 
-    this.loggerService.createLog({
+    await this.logsService.createLog({
       message,
       context,
-      level: 'error',
+      level: 'verbose',
     });
   }
 }
