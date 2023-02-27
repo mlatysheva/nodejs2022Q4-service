@@ -12,7 +12,7 @@ import { Request, Response } from 'express';
 export class CustomExceptionFilter implements ExceptionFilter {
   private logger: CustomLogger;
   constructor() {
-    this.logger = new CustomLogger();
+    this.logger = new CustomLogger('APP');
   }
   async catch(exception, host: ArgumentsHost) {
     const context = host.switchToHttp();

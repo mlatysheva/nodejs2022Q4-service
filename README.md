@@ -6,17 +6,25 @@ This is a Nestjs RESTful music library application that can do the following:
 - create, update and delete an artist, get a single artist by id and get all artists
 - create, update and delete an album, get a single album by id and get all albums
 - add, update and delete a track, artist or album to/from the user's favorites
+- signup and login a user by issuing a token and a refresh token
+- refresh the token pair
+- log errors, warning and messages with a custom logger
+- use a custom exception filter
+- use a JWT strategy to issue and validate tokens
+- store user passwords as hashed passwords using `bcrypt` library
 
 In the second part I added `Docker` to deploy the app and the database that will be used to store the information.
 The database is a `postgres` database and `Typeorm` ORM tool is used to create relations and manipulate the data in the database from the app.
 
-In the third part I added a Custom Logger, a Database Logger and an Exception Filter to log messages and errors.
+In the third part I added a Custom Logger, a Database Logger and an Exception Filter to log messages and errors. As well as implemented a JWT strategy based on `Passport` library to issue and validate tokens and refresh tokens
 
 ## The stack used
 - Docker
 - Postgresql
 - Typeorm
 - Nestjs
+- Passport
+- bcrypt
 - Typescript
 - Eslint/Prettier
 - Swagger
@@ -27,9 +35,7 @@ In the third part I added a Custom Logger, a Database Logger and an Exception Fi
 - On your local machine `cd` into the folder with the cloned repository
 - Install all NPM dependencies by running `npm i` from the command line
 - Rename the file `.env.example` into `.env`
-- Launch `Docker Desktop` on your local machine
-- Create docker containers for the app and the database by running:
-`npm run docker:build`
+- Launch `Docker` by running `npm run docker:build`
 - The following commands are available to work with the docker: 
   - `npm run docker:start` to start the containers
   - `npm run docker:stop` to stop the containers
@@ -37,12 +43,6 @@ In the third part I added a Custom Logger, a Database Logger and an Exception Fi
   - `npm run docker:scan:app` to scan the application for vulnerabilities
   - `npm run docker:scan:db` to scan the database for vulnerabilities
   - `npm run docker:scan` to scan both the database and the app for vulnerabilities
-
-- Once the app is running in the docker container, run migrations to populate the database:
-- first run `npm run migration:generate` to generate the migrations
-- then run `npm run migration:run` to run the migrations
-After the migrations have been applied to the database, run the tests by
-- `npm run test`
 
 - The application is running by default on port 4000
 - The postgres database is running by default on port 5432
@@ -56,11 +56,11 @@ After the migrations have been applied to the database, run the tests by
 
 ## Testing
 
-Once the application and database are running inside relevant Docker containers, run the tests by:
+Once the application and database are running inside relevant Docker containers, run the tests for an authorised user by:
 
-- `npm run test`
+- `npm run test:auth`
 
-![Results of the tests inside Docker](screenshots/screenshot_docker_tests.png)
+![Results of the tests](screenshots/screenshot_testAuth.png)
 
 
 - The image of the application is 485 Mb
