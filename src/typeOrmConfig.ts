@@ -1,6 +1,7 @@
 import * as dotenv from 'dotenv';
 import { TypeOrmModuleOptions } from '@nestjs/typeorm';
 import { DataSourceOptions } from 'typeorm';
+import { DatabaseLogger } from './modules/logger/databaseLogger';
 
 dotenv.config();
 
@@ -12,9 +13,9 @@ export const options = {
   database: process.env.POSTGRES_DB as string,
   password: process.env.POSTGRES_PASSWORD as string,
   migrationsRun: true,
-  synchronize: false,
+  synchronize: true,
   logging: true,
-  logger: 'file',
+  logger: new DatabaseLogger(),
 };
 
 export const dataSourceConfig = {

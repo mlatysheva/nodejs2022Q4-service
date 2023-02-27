@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException } from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { CreateTrackDto } from './dto/create-track.dto';
 import { UpdateTrackDto } from './dto/update-track.dto';
 import { TrackEntity } from './entities/track.entity';
@@ -16,8 +16,6 @@ export class TracksService {
     private artistsService: ArtistsService,
     private albumsService: AlbumsService,
   ) {}
-
-  private logger = new Logger(TracksService.name);
 
   checkArtistExists = async (artistId: string) => {
     const artist = await this.artistsService.getOne(artistId);
@@ -38,12 +36,10 @@ export class TracksService {
   };
 
   getAll = async () => {
-    this.logger.log('Getting all tracks');
     return await this.tracksService.find();
   };
 
   getOne = async (id: string) => {
-    this.logger.log(`Getting track ${id}`);
     return await this.tracksService.findOneBy({ id });
   };
 
@@ -55,7 +51,6 @@ export class TracksService {
       trackData.artistId = await this.checkArtistExists(trackData.artistId);
     }
     const track = this.tracksService.create(trackData);
-    this.logger.log(`Creating the track`);
     return await this.tracksService.save(track);
   };
 
@@ -68,7 +63,6 @@ export class TracksService {
     }
     const track = await this.tracksService.findOneBy({ id });
     if (track) {
-      this.logger.log(`Updating track ${id}`);
       await this.tracksService.update({ id }, trackData);
       return await this.tracksService.findOneBy({ id });
     } else {
@@ -77,10 +71,11 @@ export class TracksService {
   };
 
   delete = async (id: string) => {
-    this.logger.log(`Deleting track ${id}`);
     const result = await this.tracksService.delete({ id });
     if (result) {
       return true;
-    } else return false;
+    } else {
+      return false;
+    }
   };
 }

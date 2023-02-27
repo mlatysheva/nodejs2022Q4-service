@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { CreateArtistDto } from './dto/create-artist.dto';
 import { UpdateArtistDto } from './dto/update-artist.dto';
 import { ArtistEntity } from './entities/artist.entity';
@@ -12,21 +12,16 @@ export class ArtistsService {
     private artistsService: Repository<ArtistEntity>,
   ) {}
 
-  private logger = new Logger(ArtistsService.name);
-
   getAll = async (): Promise<Array<ArtistEntity>> => {
-    this.logger.log('Getting all artists');
     return await this.artistsService.find();
   };
 
   getOne = async (id: string): Promise<ArtistEntity> => {
-    this.logger.log(`Getting artist ${id}`);
     return await this.artistsService.findOneBy({ id });
   };
 
   create = async (artistData: CreateArtistDto): Promise<ArtistEntity> => {
     const artist = await this.artistsService.create(artistData);
-    this.logger.log(`Creating the artist`);
     return await this.artistsService.save(artist);
   };
 
@@ -40,7 +35,6 @@ export class ArtistsService {
     }
 
     await this.artistsService.update({ id }, artistData);
-    this.logger.log(`Updating artist ${id}`);
     return await this.artistsService.findOneBy({ id });
   };
 
@@ -50,7 +44,6 @@ export class ArtistsService {
       return null;
     }
 
-    this.logger.log(`Deleting artist ${id}`);
     return await this.artistsService.delete({ id });
   };
 }

@@ -21,30 +21,27 @@ components:
         version:
           type: number
           example: 1
-        createAt:
+        createdAt:
           type: number
           example: 1655000000
-        updateAt:
+        updatedAt:
           type: number
           example: 1655000000
       required:
         - id
         - login
-    Artist:
+    TokenData:
       type: object
       properties:
-        id:
+        accessToken:
           type: string
-          format: uuid
-        name:
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxNDAwZWJkLThkNDYtNGRkMS1iMjQ0LTE3YzI2ZmIwYmZjOSIsImxvZ2luIjoibG9sMyIsImlhdCI6MTY1OTAzOTc5NywiZXhwIjoxNjU5MDQzMzk3fQ.aRsyQPc33_iqZ7ISkxtHrk-pHzh6QOF5pTK2pl7p6Q4'
+        refreshToken:
           type: string
-          example: 'Freddie Mercury'
-        grammy:
-          type: boolean
-          example: false
+          example: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZCI6IjMxNDAwZWJkLThkNDYtNGRkMS1iMjQ0LTE3YzI2ZmIwYmZjOSIsImxvZ2luIjoibG9sMyIsImlhdCI6MTY1OTAzOTc5NywiZXhwIjoxNjU5MDQzMzk3fQ.aRsyQPc33_iqZ7ISkxtHrk-pHzh6QOF5pTK2pl7p6Q4'
       required:
-        - id
-        - name
+        - accessToken
+        - refreshToken
     Album:
       type: object
       properties:
@@ -64,6 +61,23 @@ components:
       required:
         - id
         - name
+        - year
+    Artist:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+          example: 'Freddie Mercury'
+        grammy:
+          type: boolean
+          example: false
+      required:
+        - id
+        - name
+        - grammy
     Track:
       type: object
       properties:
@@ -117,48 +131,11 @@ security:
   - bearerAuth: []
 
 paths:
-  /login:
+  /auth/signup:
     post:
       tags:
-        - Login
+        - Auth
       security: []
-      summary: Login
-      description: Logins a user and returns a JWT-token
-      requestBody:
-        required: true
-        content:
-          application/json:
-            schema:
-              type: object
-              title: example
-              properties:
-                login:
-                  type: string
-                  description: Username
-                password:
-                  type: string
-                  description: Password
-              required:
-                - user
-                - login
-      responses:
-        200:
-          description: Successful login.
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  token:
-                    type: string
-                description: JWT Token
-        403:
-          description: Incorrect login or password
-  /signup:
-    post:
-      tags:
-        - Signup
-      security: [ ]
       summary: Signup
       description: Signup a user
       requestBody:
@@ -183,16 +160,82 @@ paths:
                 - login
                 - password
       responses:
-        204:
-          description: Successful signup
+        201:
+          description: Successful signup.
+          content:
+            application/json:
+              example: { message: ' User created success' }
         400:
-          description: Bad request
-        409:
-          description: Conflict. Login already exists
+          description: No login or password, or they are not a strings
+  /auth/login:
+    post:
+      tags:
+        - Auth
+      security: []
+      summary: Login
+      description: Logins a user and returns a JWT-token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                login:
+                  type: string
+                  description: Username
+                password:
+                  type: string
+                  description: Password
+              required:
+                - login
+                - password
+      responses:
+        200:
+          description: Successful login.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenData'
+        400:
+          description: Incorrect body
+        403:
+          description: No user with such login, password
+  /auth/refresh:
+    post:
+      tags:
+        - Auth
+      summary: Refresh
+      description: Refresh user pars tokens, returns a JWT-token and Refresh JWT-token
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              title: example
+              properties:
+                refreshToken:
+                  type: string
+                  description: refresh token
+              required:
+                - refreshToken
+      responses:
+        200:
+          description: Successful login.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TokenData'
+        401:
+          description: Incorrect body
+        403:
+          description: Refresh token is invalid or expired
   /user:
     get:
       tags:
-        - Users
+        - User
       summary: Get all users
       description: Gets all users
       responses:
@@ -208,7 +251,7 @@ paths:
           $ref: '#/components/responses/UnauthorizedError'
     post:
       tags:
-        - Users
+        - User
       summary: Create user
       description: Creates a new user
       requestBody:
@@ -248,7 +291,7 @@ paths:
           type: string
     get:
       tags:
-        - Users
+        - User
       summary: Get single user by id
       description: Get single user by id
       responses:
@@ -267,7 +310,7 @@ paths:
 
     put:
       tags:
-        - Users
+        - User
       summary: Update a user's password
       description: Updates a user's password by ID
       requestBody:
@@ -305,10 +348,10 @@ paths:
                   version:
                     type: integer
                     example: 2
-                  createAt:
+                  createdAt:
                     type: integer
                     example: 1655000000
-                  updateAt:
+                  updatedAt:
                     type: integer
                     example: 1655999999
         400:
@@ -316,13 +359,13 @@ paths:
         401:
           $ref: '#/components/responses/UnauthorizedError'
         403:
-          description: oldPassowrd is wrong
+          description: oldPassword is wrong
         404:
           description: User not found
 
     delete:
       tags:
-        - Users
+        - User
       summary: Delete user
       description: Deletes user by ID.
       responses:
@@ -485,7 +528,7 @@ paths:
       description: Delete track from library
       responses:
         204:
-          description: Delelted succesfully
+          description: Deleted successfully
         400:
           description: Bad request. trackId is invalid (not uuid)
         401:
@@ -497,7 +540,7 @@ paths:
       tags:
         - Album
       summary: Get albums list
-      description: Gets all library alibums list
+      description: Gets all library albums list
       responses:
         200:
           description: Successful operation
@@ -535,7 +578,7 @@ paths:
                 - year
       responses:
         201:
-          description: Almub is created
+          description: Album is created
           content:
             application/json:
               schema:
@@ -614,7 +657,7 @@ paths:
       description: Delete album from library
       responses:
         204:
-          description: Deleted succesfully
+          description: Deleted successfully
         400:
           description: Bad request. albumId is invalid (not uuid)
         401:
@@ -733,7 +776,7 @@ paths:
       description: Delete artist from library
       responses:
         204:
-          description: Delelted succesfully
+          description: Deleted successfully
         400:
           description: Bad request. artistId is invalid (not uuid)
         401:
@@ -753,8 +796,6 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Favorites'
-        401:
-          $ref: '#/components/responses/UnauthorizedError'
   /favs/track/{id}:
     parameters:
       - name: id
@@ -770,7 +811,7 @@ paths:
       description: Add track to the favorites
       responses:
         201:
-          description: Added succesfully
+          description: Added successfully
         400:
           description: Bad. trackId is invalid (not uuid)
         401:
@@ -784,7 +825,7 @@ paths:
       description: Delete track from favorites
       responses:
         204:
-          description: Deleted succesfully
+          description: Deleted successfully
         400:
           description: Bad. trackId is invalid (not uuid)
         401:
@@ -806,7 +847,7 @@ paths:
       description: Add album to the favorites
       responses:
         201:
-          description: Added succesfully
+          description: Added successfully
         400:
           description: Bad. albumId is invalid (not uuid)
         401:
@@ -820,7 +861,7 @@ paths:
       description: Delete album from favorites
       responses:
         204:
-          description: Deleted succesfully
+          description: Deleted successfully
         400:
           description: Bad. albumId is invalid (not uuid)
         401:
@@ -842,7 +883,7 @@ paths:
       description: Add artist to the favorites
       responses:
         201:
-          description: Added succesfully
+          description: Added successfully
         400:
           description: Bad request. artistId is invalid (not uuid)
         401:
@@ -856,7 +897,7 @@ paths:
       description: Delete artist from favorites
       responses:
         204:
-          description: Deleted succesfully
+          description: Deleted successfully
         400:
           description: Bad request. artistId is invalid (not uuid)
         401:
