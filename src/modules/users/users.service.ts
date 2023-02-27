@@ -15,8 +15,6 @@ import { compare, hash } from 'bcrypt';
 
 @Injectable()
 export class UsersService {
-  private logger = new Logger();
-
   constructor(
     @InjectRepository(UserEntity)
     private usersService: Repository<UserEntity>,
@@ -36,15 +34,6 @@ export class UsersService {
       throw new BadRequestException(ErrorMessage.ALREADY_EXISTS);
     }
   };
-
-  // async updateRefreshToken(id: string, newRefreshToken: string) {
-  //   await this.usersService
-  //     .createQueryBuilder()
-  //     .update(UserEntity)
-  //     .set({ refreshToken: newRefreshToken })
-  //     .where('id = :id', { id })
-  //     .execute();
-  // }
 
   getAll = async () => {
     return await this.usersService.find();
