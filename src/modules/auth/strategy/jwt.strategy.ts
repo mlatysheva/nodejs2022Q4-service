@@ -1,10 +1,14 @@
-import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { Injectable, Logger, UnauthorizedException } from '@nestjs/common';
 import { PassportStrategy } from '@nestjs/passport';
 import { ExtractJwt, Strategy } from 'passport-jwt';
 import { UsersService } from '../../users/users.service';
 import 'dotenv/config';
 import { ErrorMessage } from '../../../constants/errors';
 
+type JwtPayload = {
+  sub: string;
+  username: string;
+};
 @Injectable()
 export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
   constructor(private readonly usersService: UsersService) {
@@ -15,11 +19,14 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
     });
   }
 
-  async validate(id: string, login: string) {
-    const existingUser = await this.usersService.findByLogin(login);
-    if (!existingUser || existingUser.id !== id) {
+  private logger = new Logger();
+
+  async validate(data: JwtPayload) {
+    const existingUser = await this.usersService.findByLogin(data.username);
+    this.logger.log(`existingUser is ${existingUser}`);
+    if (!existingUser || existingUser.id !== data.sub) {
       throw new UnauthorizedException(ErrorMessage.NOT_AUTHORISED);
     }
-    return { id, login };
+    return data;
   }
 }

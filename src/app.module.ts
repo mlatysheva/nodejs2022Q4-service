@@ -30,10 +30,10 @@ import { JwtGuard } from './modules/auth/guard/jwt.guard';
   ],
   controllers: [],
   providers: [
-    {
-      provide: APP_GUARD,
-      useClass: JwtGuard,
-    },
+    // {
+    //   provide: APP_GUARD,
+    //   useClass: JwtGuard,
+    // },
   ],
 })
 export class AppModule {
