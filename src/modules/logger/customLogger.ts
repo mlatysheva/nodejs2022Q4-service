@@ -10,9 +10,8 @@ import { ErrorMessage } from '../../constants/errors';
 
 @Injectable()
 export class CustomLogger extends ConsoleLogger {
-  constructor(context: string, options: ConsoleLoggerOptions) {
+  constructor(context: string) {
     super(context, {
-      ...options,
       logLevels: getLogLevels(),
     });
   }

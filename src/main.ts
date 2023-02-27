@@ -6,7 +6,7 @@ import 'dotenv/config';
 import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';
 import { getLogLevels } from './modules/logger/getLogLevels';
-import { HttpExceptionFilter } from './modules/logger/exceptionFilter';
+import { CustomExceptionFilter } from './modules/logger/exceptionFilter';
 import {
   ClassSerializerInterceptor,
   Logger,
@@ -15,7 +15,8 @@ import {
 import { CustomLogger } from './modules/logger/customLogger';
 
 async function bootstrap() {
-  const logger = new Logger(bootstrap.name);
+  // const logger = new Logger(bootstrap.name);
+  const logger = new CustomLogger(bootstrap.name);
 
   const port = process.env.PORT || 4000;
   const app = await NestFactory.create(AppModule, {
@@ -26,7 +27,7 @@ async function bootstrap() {
     .useGlobalInterceptors(new ClassSerializerInterceptor(app.get(Reflector)))
     .useLogger(app.get(CustomLogger));
   app
-    .useGlobalFilters(new HttpExceptionFilter())
+    .useGlobalFilters(new CustomExceptionFilter())
     .useGlobalPipes(new ValidationPipe())
     .useGlobalPipes(
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
@@ -41,15 +42,15 @@ async function bootstrap() {
 
   process.on('unhandledRejection', (reason, promise) => {
     logger.error(
-      `${new Date().toUTCString()} Unhandled Rejection at Promise reason: ${reason} promise: ${promise}`,
+      `${new Date().toUTCString()} Unhandled Rejection at: ${promise}, reason: ${reason}`,
     );
   });
 
-  process.on('uncaughtException', (err) => {
+  process.on('uncaughtException', (error) => {
     logger.error(
-      `${new Date().toUTCString()} Uncaught Exception thrown ${
-        err.message
-      } stack: ${err.stack}`,
+      `${new Date().toUTCString()} Uncaught Exception at: ${
+        error.message
+      } stack: ${error.stack}`,
     );
     process.exit(1);
   });

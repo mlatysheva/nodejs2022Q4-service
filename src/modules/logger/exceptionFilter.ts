@@ -8,9 +8,14 @@ import {
 } from '@nestjs/common';
 
 @Catch()
-export class HttpExceptionFilter implements ExceptionFilter {
-  catch(exception: HttpException, host: ArgumentsHost) {
-    const { getRequest, getResponse } = host.switchToHttp();
+export class CustomExceptionFilter implements ExceptionFilter {
+  private logger: CustomLogger;
+  constructor() {
+    this.logger = new CustomLogger('APP');
+  }
+  async catch(exception, host: ArgumentsHost) {
+    const context = host.switchToHttp();
+    const { getRequest, getResponse } = context;
 
     const { method, originalUrl } = getRequest();
     const response = getResponse();
@@ -24,6 +29,12 @@ export class HttpExceptionFilter implements ExceptionFilter {
       exception instanceof HttpException
         ? exception.getResponse()['message']
         : 'Internal server error';
+
+    if (!(exception instanceof HttpException)) {
+      this.logger.error(
+        `${new Date().toUTCString()} Exception at: method: ${method}, url: ${originalUrl}, status: ${statusCode}, message: ${message}`,
+      );
+    }
 
     response
       .status(statusCode)
