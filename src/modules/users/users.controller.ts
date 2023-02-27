@@ -13,17 +13,14 @@ import {
   ForbiddenException,
   BadRequestException,
   ValidationPipe,
-  UseGuards,
 } from '@nestjs/common';
 import { UsersService } from './users.service';
 import { CreateUserDto } from './dto/createUser.dto';
 import { UpdateUserDto } from './dto/updateUser.dto';
 import { UUID_VERSION } from '../../constants/uuidVersion';
 import { ErrorMessage } from '../../constants/errors';
-import { AuthGuard } from '@nestjs/passport';
 
 @Controller('user')
-// @UseGuards(AuthGuard('jwt'))
 export class UsersController {
   constructor(private readonly usersService: UsersService) {}
 

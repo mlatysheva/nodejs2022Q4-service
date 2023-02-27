@@ -1,15 +1,9 @@
-import {
-  BadRequestException,
-  ForbiddenException,
-  Injectable,
-  NotFoundException,
-} from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { LoginDto } from './dto/login.dto';
 import * as bcrypt from 'bcrypt';
 import { JwtService } from '@nestjs/jwt';
 import { UsersService } from '../users/users.service';
 import { CreateUserDto } from '../users/dto/createUser.dto';
-import { UserEntity } from '../users/entities/user.entity';
 
 @Injectable()
 export class AuthService {
@@ -34,29 +28,6 @@ export class AuthService {
     });
     return { accessToken, refreshToken };
   }
-
-  // async getTokens(userId: string, login: string) {
-  //   const accessToken = await this.createAccessToken(userId, login);
-  //   const refreshToken = await this.createRefreshToken(userId, login);
-  //   return { accessToken, refreshToken };
-  // }
-
-  private generateToken = async (data, options?) => {
-    const token = this.jwtService.sign(data, options);
-
-    return token;
-  };
-
-  private getTokens = async (userId, login) => {
-    const user = { id: userId, login: login };
-    return {
-      accessToken: await this.generateToken(user),
-      refreshToken: await this.generateToken(
-        { ...user, isRefresh: true },
-        { expiresIn: process.env.TOKEN_REFRESH_EXPIRE_TIME },
-      ),
-    };
-  };
 
   private validateUser = async (login: string, password: string) => {
     const user = await this.usersService.findByLogin(login);

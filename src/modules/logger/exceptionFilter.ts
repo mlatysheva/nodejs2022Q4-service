@@ -6,19 +6,19 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
+import { Request, Response } from 'express';
 
 @Catch()
 export class CustomExceptionFilter implements ExceptionFilter {
   private logger: CustomLogger;
   constructor() {
-    this.logger = new CustomLogger('APP');
+    this.logger = new CustomLogger();
   }
   async catch(exception, host: ArgumentsHost) {
     const context = host.switchToHttp();
-    const { getRequest, getResponse } = context;
-
-    const { method, originalUrl } = getRequest();
-    const response = getResponse();
+    const response = context.getResponse<Response>();
+    const request = context.getRequest<Request>();
+    const { method, originalUrl } = request;
 
     const statusCode =
       exception instanceof HttpException
@@ -30,10 +30,10 @@ export class CustomExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()['message']
         : 'Internal server error';
 
+    const logMessage = `${new Date().toUTCString()} method: ${method}, url: ${originalUrl}, status: ${statusCode}, message: ${message}`;
+
     if (!(exception instanceof HttpException)) {
-      this.logger.error(
-        `${new Date().toUTCString()} Exception at: method: ${method}, url: ${originalUrl}, status: ${statusCode}, message: ${message}`,
-      );
+      this.logger.error(logMessage, 'EXCEPTION_FILTER');
     }
 
     response

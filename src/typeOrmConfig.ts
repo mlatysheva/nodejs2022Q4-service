@@ -13,7 +13,7 @@ export const options = {
   database: process.env.POSTGRES_DB as string,
   password: process.env.POSTGRES_PASSWORD as string,
   migrationsRun: true,
-  synchronize: false,
+  synchronize: true,
   logging: true,
   logger: new DatabaseLogger(),
 };

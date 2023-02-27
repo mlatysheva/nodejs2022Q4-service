@@ -23,7 +23,6 @@ export class JwtStrategy extends PassportStrategy(Strategy, 'jwt') {
 
   async validate(data: JwtPayload) {
     const existingUser = await this.usersService.findByLogin(data.username);
-    this.logger.log(`existingUser is ${existingUser}`);
     if (!existingUser || existingUser.id !== data.sub) {
       throw new UnauthorizedException(ErrorMessage.NOT_AUTHORISED);
     }

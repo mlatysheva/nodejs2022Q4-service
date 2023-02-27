@@ -1,6 +1,4 @@
 import { Injectable, ConsoleLogger } from '@nestjs/common';
-import { ConsoleLoggerOptions } from '@nestjs/common/services/console-logger.service';
-import { ConfigService } from '@nestjs/config';
 import { getLogLevels } from './getLogLevels';
 import { CreateLogDto } from './dto/createLog.dto';
 import { EOL } from 'os';
@@ -10,11 +8,6 @@ import { ErrorMessage } from '../../constants/errors';
 
 @Injectable()
 export class CustomLogger extends ConsoleLogger {
-  constructor(context: string) {
-    super(context, {
-      logLevels: getLogLevels(),
-    });
-  }
   private logLevels = getLogLevels();
 
   async createLog(log: CreateLogDto) {
@@ -34,19 +27,21 @@ export class CustomLogger extends ConsoleLogger {
       context,
       level: 'log',
     });
-    this.writeToFile(newLog);
+    // this.writeToFile(newLog);
+    return newLog;
   }
 
-  async error(message: string, stack?: string, context?: string | 'NEST') {
+  async error(message: string, context?: string | 'NEST', stack?: string) {
     if (!this.logLevels.includes('error')) return;
 
     super.error.apply(this, [message, stack, context || 'NEST']);
 
-    await this.createLog({
+    const newLog = await this.createLog({
       message,
       context,
       level: 'error',
     });
+    return newLog;
   }
 
   async warn(message: string, context?: string | 'NEST') {
@@ -54,11 +49,12 @@ export class CustomLogger extends ConsoleLogger {
 
     super.warn.apply(this, [message, context || 'NEST']);
 
-    await this.createLog({
+    const newLog = await this.createLog({
       message,
       context,
       level: 'warn',
     });
+    return newLog;
   }
 
   async debug(message: string, context?: string | '[NEST]') {
@@ -66,11 +62,12 @@ export class CustomLogger extends ConsoleLogger {
 
     super.debug.apply(this, [message, context || 'NEST']);
 
-    await this.createLog({
+    const newLog = await this.createLog({
       message,
       context,
       level: 'debug',
     });
+    return newLog;
   }
 
   async verbose(message: string, context?: string | 'NEST') {
@@ -78,11 +75,12 @@ export class CustomLogger extends ConsoleLogger {
 
     super.verbose.apply(this, [message, context]);
 
-    await this.createLog({
+    const newLog = await this.createLog({
       message,
       context,
       level: 'verbose',
     });
+    return newLog;
   }
 
   private logsDirectory = join(__dirname, 'logs');

@@ -2,25 +2,17 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { parse } from 'yaml';
 import { AppModule } from './app.module';
-import 'dotenv/config';
 import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';
-import { getLogLevels } from './modules/logger/getLogLevels';
 import { CustomExceptionFilter } from './modules/logger/exceptionFilter';
-import {
-  ClassSerializerInterceptor,
-  Logger,
-  ValidationPipe,
-} from '@nestjs/common';
+import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { CustomLogger } from './modules/logger/customLogger';
 
 async function bootstrap() {
-  // const logger = new Logger(bootstrap.name);
   const logger = new CustomLogger(bootstrap.name);
 
   const port = process.env.PORT || 4000;
   const app = await NestFactory.create(AppModule, {
-    logger: getLogLevels(),
     bufferLogs: true,
   });
   app
@@ -28,7 +20,6 @@ async function bootstrap() {
     .useLogger(app.get(CustomLogger));
   app
     .useGlobalFilters(new CustomExceptionFilter())
-    .useGlobalPipes(new ValidationPipe())
     .useGlobalPipes(
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
     );
