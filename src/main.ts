@@ -5,8 +5,7 @@ import { AppModule } from './app.module';
 import 'dotenv/config';
 import { dirname, join } from 'path';
 import { readFile } from 'fs/promises';
-// import getLogLevels from './modules/logger/getLogLevels';
-import getLogLevels from './modules/logger/getLogLevels';
+import { getLogLevels } from './modules/logger/getLogLevels';
 import { HttpExceptionFilter } from './modules/logger/exceptionFilter';
 import {
   ClassSerializerInterceptor,
@@ -20,7 +19,7 @@ async function bootstrap() {
 
   const port = process.env.PORT || 4000;
   const app = await NestFactory.create(AppModule, {
-    logger: getLogLevels(true),
+    logger: getLogLevels(),
     bufferLogs: true,
   });
   app
