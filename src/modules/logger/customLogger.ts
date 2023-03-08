@@ -69,7 +69,7 @@ export class CustomLogger extends ConsoleLogger {
     this.writeToLogFile('warn', newLog);
   }
 
-  debug(message: string, context?: string | '[NEST]') {
+  debug(message: string, context?: string | 'NEST') {
     if (!this.logLevels.includes('debug')) return;
 
     super.debug(message, context || 'NEST');

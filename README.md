@@ -16,7 +16,8 @@ This is a Nestjs RESTful music library application that can do the following:
 In the second part I added `Docker` to deploy the app and the database that will be used to store the information.
 The database is a `postgres` database and `Typeorm` ORM tool is used to create relations and manipulate the data in the database from the app.
 
-In the third part I added a Custom Logger, a Database Logger and an Exception Filter to log messages and errors. As well as implemented a JWT strategy based on `Passport` library to issue and validate tokens and refresh tokens
+In the third part I added a Custom Logger, a Database Logger and an Exception Filter to log messages and errors. As well as implemented user authentication based on the JWT strategy using the `Passport` library to issue and validate tokens and refresh tokens.
+Logs are written to a file and files rotate based on the log type (errors are logged separately) and the maximum file size specified in the .env file.
 
 ## The stack used
 - Docker
@@ -78,3 +79,6 @@ Once the application and database are running inside relevant Docker containers,
   - `npm run migration:generate` - to generate migrations
   - `npm run migration:run` - to run migrations
 - Migrations are incoporated into the docker app when the app image is being built
+
+- Logs are written to a file. Errors are written to a separate file. Files rotate based on the maximum file size specified in the `.env` file.
+![Logs written to a file](screenshots/screenshot_logs.png)
