@@ -10,6 +10,4 @@ COPY . .
 
 EXPOSE ${PORT}
 
-RUN npm run migration:generate
-
 CMD  ["npm", "run", "start:dev"]

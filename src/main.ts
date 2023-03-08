@@ -2,14 +2,14 @@ import { NestFactory, Reflector } from '@nestjs/core';
 import { SwaggerModule } from '@nestjs/swagger';
 import { parse } from 'yaml';
 import { AppModule } from './app.module';
-import { dirname, join } from 'path';
+import { resolve } from 'path';
 import { readFile } from 'fs/promises';
 import { CustomExceptionFilter } from './modules/logger/exceptionFilter';
 import { ClassSerializerInterceptor, ValidationPipe } from '@nestjs/common';
 import { CustomLogger } from './modules/logger/customLogger';
 
 async function bootstrap() {
-  const logger = new CustomLogger(bootstrap.name);
+  const logger = new CustomLogger();
 
   const port = process.env.PORT || 4000;
   const app = await NestFactory.create(AppModule, {
@@ -24,9 +24,12 @@ async function bootstrap() {
       new ValidationPipe({ whitelist: true, forbidNonWhitelisted: true }),
     );
 
-  const rootDirname = dirname(__dirname);
-  const DOC_API = await readFile(join(rootDirname, 'doc', 'api.yaml'), 'utf-8');
+  const DOC_API = await readFile(
+    resolve(process.cwd(), 'doc', 'api.yaml'),
+    'utf8',
+  );
   const document = parse(DOC_API);
+
   SwaggerModule.setup('doc', app, document);
 
   await app.listen(port);

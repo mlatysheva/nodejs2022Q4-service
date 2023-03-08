@@ -4,7 +4,6 @@ services:
     image: music_app_image
     container_name: music_app_container
     build: .
-    env_file: .env
     environment:
       PORT: ${PORT}
       POSTGRES_HOST: music_db
@@ -15,8 +14,9 @@ services:
     depends_on:
       - music_db
     volumes:
-      - ./:/usr/app/
-      - node_modules:/usr/app/node_modules
+      # - node_modules:/usr/app/node_modules
+      - ./src:/usr/app/src
+      - ./logs:/usr/app/logs
     networks:
       - music_bridge
     restart: always
@@ -32,19 +32,19 @@ services:
       POSTGRES_USER: ${POSTGRES_USER}
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
       POSTGRES_DB: ${POSTGRES_DB}
+
     restart: always
     volumes:
-      - music_db:/var/lib/music_db/data
+      - music_db_logs:/var/lib/postgresql/data
     networks:
       - music_bridge
     ports:
       - ${POSTGRES_PORT}:${POSTGRES_PORT}
 
 volumes:
-  music_db:
+  music_db_logs:
   node_modules:
 
 networks:
   music_bridge:
-    name: 'music_bridge'
     driver: bridge
