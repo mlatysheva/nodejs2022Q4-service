@@ -1,18 +1,16 @@
-import { Injectable, ConsoleLogger, Logger } from '@nestjs/common';
+import { Injectable, ConsoleLogger } from '@nestjs/common';
 import { getLogLevels } from './getLogLevels';
 import { CreateLogDto } from './dto/createLog.dto';
 import { EOL } from 'os';
-import { statSync, mkdirSync, writeFileSync, appendFileSync } from 'fs';
+import { appendFileSync } from 'fs';
 import { ErrorMessage } from '../../constants/errors';
 import * as fs from 'fs';
 import * as path from 'path';
 
 @Injectable()
 export class CustomLogger extends ConsoleLogger {
-  private logger = new Logger('NEST');
-
   private logLevels = getLogLevels();
-  private logsFolderPath = path.join(process.cwd(), 'logs');
+  private logsFolderPath: string;
   private logsFilePath: string;
   private errorLogsFilePath: string;
   private maxLogFileSize =
@@ -20,9 +18,9 @@ export class CustomLogger extends ConsoleLogger {
 
   constructor() {
     super();
-    if (!fs.existsSync(this.logsFolderPath)) {
-      fs.mkdirSync(this.logsFolderPath);
-    }
+    this.logsFolderPath = path.join(process.cwd(), 'logs');
+    this.logsFilePath = this.createLogFile('log');
+    this.errorLogsFilePath = this.createLogFile('error');
   }
 
   createLog(log: CreateLogDto) {
@@ -42,95 +40,79 @@ export class CustomLogger extends ConsoleLogger {
       context,
       level: 'log',
     });
-    // this.logger.log(`this.logsFilePath: ${this.logsFilePath}`);
     this.writeToLogFile('log', newLog);
-    // return newLog;
   }
 
-  async error(message: string, context?: string | 'NEST', stack?: string) {
+  error(message: string, context?: string | 'NEST', stack?: string) {
     if (!this.logLevels.includes('error')) return;
 
-    super.error.apply(this, [message, stack, context || 'NEST']);
+    super.error(message, stack, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'error',
     });
-    await this.writeToLogFile('error', newLog);
-    // return newLog;
+    this.writeToLogFile('error', newLog);
   }
 
-  async warn(message: string, context?: string | 'NEST') {
+  warn(message: string, context?: string | 'NEST') {
     if (!this.logLevels.includes('warn')) return;
 
-    super.warn.apply(this, [message, context || 'NEST']);
+    super.warn(message, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'warn',
     });
-    return newLog;
+    this.writeToLogFile('warn', newLog);
   }
 
-  async debug(message: string, context?: string | '[NEST]') {
+  debug(message: string, context?: string | '[NEST]') {
     if (!this.logLevels.includes('debug')) return;
 
-    super.debug.apply(this, [message, context || 'NEST']);
+    super.debug(message, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'debug',
     });
-    return newLog;
+    this.writeToLogFile('debug', newLog);
   }
 
-  async verbose(message: string, context?: string | 'NEST') {
+  verbose(message: string, context?: string | 'NEST') {
     if (!this.logLevels.includes('verbose')) return;
 
-    super.verbose.apply(this, [message, context]);
+    super.verbose(message, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'verbose',
     });
-    return newLog;
+    this.writeToLogFile('verbose', newLog);
   }
 
-  private doesFileExist(filePath: string) {
-    this.logger.log(`Checking if file exists: ${filePath}`);
+  private checkSizeAndCreateFile(type: string) {
     try {
-      fs.existsSync(filePath);
-      this.logger.log(`File exists: ${filePath}`);
-      return true;
-    } catch (error) {
-      return false;
-    }
-  }
-
-  private isFileSizeNotExceeded(filePath: string) {
-    try {
+      const filePath =
+        type === 'error' ? this.errorLogsFilePath : this.logsFilePath;
       const stat = fs.statSync(filePath);
       const fileSize = Math.round(stat.size);
       if (fileSize < this.maxLogFileSize) {
-        return true;
+        return;
       } else {
-        return false;
+        if (type === 'error') {
+          this.errorLogsFilePath = this.createLogFile('error');
+        } else {
+          this.logsFilePath = this.createLogFile('log');
+        }
       }
     } catch (error) {
-      return error;
+      return null;
     }
-  }
-
-  private writeToNewFile(filePath: string, message: string) {
-    fs.writeFileSync(filePath, message, 'utf-8');
-  }
-
-  private appendToFile(filePath: string, message: string) {
-    fs.appendFileSync(filePath, message, 'utf-8');
   }
 
   private createLogFile(type: string) {
@@ -141,86 +123,14 @@ export class CustomLogger extends ConsoleLogger {
     return logFilePath;
   }
 
-  private writeToLogFile2(filePath: string, type: string, message: any) {
-    this.logger.log(`Writing to file: ${filePath}`);
-    try {
-      if (this.doesFileExist(filePath)) {
-        if (this.isFileSizeNotExceeded(filePath)) {
-          this.appendToFile(filePath, message);
-        } else {
-          const logFilePath = this.createLogFile(type);
-          this.writeToNewFile(logFilePath, message);
-          if (type === 'error') {
-            this.errorLogsFilePath = logFilePath;
-            this.logger.log(`Error log file path: ${this.errorLogsFilePath}`);
-          } else {
-            this.logsFilePath = logFilePath;
-            this.logger.log(`Log file path: ${this.logsFilePath}`);
-          }
-        }
-      } else {
-        this.logger.log(`File does not exist: ${filePath}`);
-        const logFilePath = this.createLogFile(type);
-        this.logger.log(`Creating new file: ${logFilePath}`);
-        this.writeToNewFile(logFilePath, message);
-        if (type === 'error') {
-          this.errorLogsFilePath = logFilePath;
-        } else {
-          this.logsFilePath = logFilePath;
-        }
-      }
-    } catch (error) {
-      this.logger.error(ErrorMessage.ERROR_WRITING_TO_FILE, error.stack);
-    }
-  }
-
   private writeToLogFile(type: string, message: any) {
     try {
-      if (type === 'error') {
-        if (fs.existsSync(this.errorLogsFilePath)) {
-          const stat = fs.statSync(this.errorLogsFilePath);
-          const fileSize = Math.round(stat.size);
-          if (fileSize < this.maxLogFileSize) {
-            fs.appendFileSync(this.errorLogsFilePath, message, 'utf-8');
-          } else {
-            const logFilePath = path.join(
-              this.logsFolderPath,
-              `${new Date().toISOString()}-error.log`,
-            );
-            this.errorLogsFilePath = logFilePath;
-            fs.writeFileSync(this.errorLogsFilePath, message, 'utf-8');
-          }
-        } else {
-          const logFilePath = path.join(
-            this.logsFolderPath,
-            `${new Date().toISOString()}-error.log`,
-          );
-          this.errorLogsFilePath = logFilePath;
-          fs.writeFileSync(this.errorLogsFilePath, message, 'utf-8');
-        }
-      } else {
-        if (fs.existsSync(this.logsFilePath)) {
-          const stat = fs.statSync(this.logsFilePath);
-          const fileSize = Math.round(stat.size);
-          if (fileSize < this.maxLogFileSize) {
-            fs.appendFileSync(this.logsFilePath, message + EOL, 'utf-8');
-          } else {
-            const logFilePath = path.join(
-              this.logsFolderPath,
-              `${new Date().toISOString()}-log.log`,
-            );
-            this.logsFilePath = logFilePath;
-            fs.writeFileSync(this.logsFilePath, message + EOL, 'utf-8');
-          }
-        } else {
-          const logFilePath = path.join(
-            this.logsFolderPath,
-            `${new Date().toISOString()}-log.log`,
-          );
-          this.logsFilePath = logFilePath;
-          fs.writeFileSync(this.logsFilePath, message + EOL, 'utf-8');
-        }
-      }
-    } catch {}
+      this.checkSizeAndCreateFile(type);
+      const filePath =
+        type === 'error' ? this.errorLogsFilePath : this.logsFilePath;
+      appendFileSync(filePath, message, 'utf-8');
+    } catch (error) {
+      console.error(ErrorMessage.ERROR_WRITING_TO_FILE, error.stack);
+    }
   }
 }
