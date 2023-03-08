@@ -14,7 +14,7 @@
     "start:prod": "node dist/main",
     "start:migration:dev": "npm run migration:generate && npm run start:dev",
     "docker:start": "docker compose start",
-    "docker:build": "npm run docker:clean && docker-compose up --build",
+    "docker:build": "docker-compose up --build",
     "docker:stop": "docker compose stop",
     "docker:test": "docker exec -it $(docker ps -f name=music_app_container -q) npm run test",
     "docker:scan:app": "docker scan music_app_image",

@@ -8,7 +8,7 @@ export class LogsMiddleware implements NestMiddleware {
   private logger: CustomLogger;
 
   constructor() {
-    this.logger = new CustomLogger('HTTP');
+    this.logger = new CustomLogger();
   }
 
   use(request: Request, response: Response, next: NextFunction) {

@@ -2,125 +2,135 @@ import { Injectable, ConsoleLogger } from '@nestjs/common';
 import { getLogLevels } from './getLogLevels';
 import { CreateLogDto } from './dto/createLog.dto';
 import { EOL } from 'os';
-import { statSync, mkdirSync, writeFileSync, appendFileSync } from 'fs';
-import { join } from 'path';
+import { appendFileSync } from 'fs';
 import { ErrorMessage } from '../../constants/errors';
+import * as fs from 'fs';
+import * as path from 'path';
 
 @Injectable()
 export class CustomLogger extends ConsoleLogger {
   private logLevels = getLogLevels();
+  private logsFolderPath: string;
+  private logsFilePath: string;
+  private errorLogsFilePath: string;
+  private maxLogFileSize =
+    Number(process.env.MAX_SIZE_LOG_FILE) * 1024 || 25 * 1024;
 
-  async createLog(log: CreateLogDto) {
+  constructor() {
+    super();
+    this.logsFolderPath = path.join(process.cwd(), 'logs');
+    this.logsFilePath = this.createLogFile('log');
+    this.errorLogsFilePath = this.createLogFile('error');
+  }
+
+  createLog(log: CreateLogDto) {
     const newLog = `[NEST] ${new Date().toUTCString()} [Level: ${
       log.level
     }] Context: ${log.context} Message: ${log.message}${EOL}`;
     return newLog;
   }
 
-  async log(message: string, context: string | 'NEST') {
+  log(message: string, context: string | 'NEST') {
     if (!this.logLevels.includes('log')) return;
 
-    super.log.apply(this, [message, context || 'NEST']);
+    super.log(message, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'log',
     });
-    // this.writeToFile(newLog);
-    return newLog;
+    this.writeToLogFile('log', newLog);
   }
 
-  async error(message: string, context?: string | 'NEST', stack?: string) {
+  error(message: string, context?: string | 'NEST', stack?: string) {
     if (!this.logLevels.includes('error')) return;
 
-    super.error.apply(this, [message, stack, context || 'NEST']);
+    super.error(message, stack, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'error',
     });
-    return newLog;
+    this.writeToLogFile('error', newLog);
   }
 
-  async warn(message: string, context?: string | 'NEST') {
+  warn(message: string, context?: string | 'NEST') {
     if (!this.logLevels.includes('warn')) return;
 
-    super.warn.apply(this, [message, context || 'NEST']);
+    super.warn(message, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'warn',
     });
-    return newLog;
+    this.writeToLogFile('warn', newLog);
   }
 
-  async debug(message: string, context?: string | '[NEST]') {
+  debug(message: string, context?: string | 'NEST') {
     if (!this.logLevels.includes('debug')) return;
 
-    super.debug.apply(this, [message, context || 'NEST']);
+    super.debug(message, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'debug',
     });
-    return newLog;
+    this.writeToLogFile('debug', newLog);
   }
 
-  async verbose(message: string, context?: string | 'NEST') {
+  verbose(message: string, context?: string | 'NEST') {
     if (!this.logLevels.includes('verbose')) return;
 
-    super.verbose.apply(this, [message, context]);
+    super.verbose(message, context || 'NEST');
 
-    const newLog = await this.createLog({
+    const newLog = this.createLog({
       message,
       context,
       level: 'verbose',
     });
-    return newLog;
+    this.writeToLogFile('verbose', newLog);
   }
 
-  private logsDirectory = join(__dirname, 'logs');
-
-  private getLogFilePath = (): string => {
-    return join(this.logsDirectory, 'logFile.txt');
-  };
-
-  private createLogsDirectory = (): void => {
+  private checkSizeAndCreateFile(type: string) {
     try {
-      if (statSync(this.logsDirectory)) {
+      const filePath =
+        type === 'error' ? this.errorLogsFilePath : this.logsFilePath;
+      const stat = fs.statSync(filePath);
+      const fileSize = Math.round(stat.size);
+      if (fileSize < this.maxLogFileSize) {
         return;
+      } else {
+        if (type === 'error') {
+          this.errorLogsFilePath = this.createLogFile('error');
+        } else {
+          this.logsFilePath = this.createLogFile('log');
+        }
       }
-      mkdirSync(this.logsDirectory, { recursive: true });
     } catch (error) {
-      throw new Error(ErrorMessage.ERROR_CREATING_DIRECTORY);
+      return null;
     }
-  };
+  }
 
-  private createLogsFile = (): string => {
-    try {
-      const logsFile = join(this.logsDirectory, 'logsFile.txt');
-      if (statSync(logsFile)) {
-        return logsFile;
-      }
-      writeFileSync(logsFile, '', {
-        encoding: 'utf8',
-        flag: 'w',
-      });
-    } catch (error) {
-      throw Error(ErrorMessage.ERROR_CREATING_FILE);
-    }
-  };
+  private createLogFile(type: string) {
+    const logFilePath = path.join(
+      this.logsFolderPath,
+      `${new Date().toISOString()}-${type}.log`,
+    );
+    return logFilePath;
+  }
 
-  private writeToFile = (message: string) => {
+  private writeToLogFile(type: string, message: any) {
     try {
-      const logsFile = this.getLogFilePath();
-      appendFileSync(logsFile, message, 'utf8');
+      this.checkSizeAndCreateFile(type);
+      const filePath =
+        type === 'error' ? this.errorLogsFilePath : this.logsFilePath;
+      appendFileSync(filePath, message, 'utf-8');
     } catch (error) {
-      throw Error(ErrorMessage.ERROR_WRITING_TO_FILE);
+      console.error(ErrorMessage.ERROR_WRITING_TO_FILE, error.stack);
     }
-  };
+  }
 }
